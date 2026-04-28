@@ -71,16 +71,6 @@ class UserController extends Controller
     }
 
     /**
-     * Get current authenticated user
-     */
-    public function getUser(Request $request)
-    {
-        return response()->json([
-            'user' => $request->user(),
-        ], 200);
-    }
-
-    /**
      * Create admin user
      */
     public function createAdmin()
@@ -109,6 +99,27 @@ class UserController extends Controller
                 'password' => 'admin'
             ]
         ], 201);
+    }
+
+    public function createToken(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+
+        if (!$user || !Hash::check($validated['password'], $user->password)) {
+            return response()->json([
+                'message' => 'Invalid credentials',
+            ], 401);
+        }
+
+        return response()->json([
+            'message' => 'Token created successfully',
+            'token' => $user->createToken('auth_token')->plainTextToken,
+        ], 200);
     }
 
     /**
