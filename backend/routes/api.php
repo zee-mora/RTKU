@@ -25,4 +25,5 @@ Route::post('/token', [AuthController::class, 'createToken']);
 */
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/users/datatables', [UserController::class, 'datatables']);
 });

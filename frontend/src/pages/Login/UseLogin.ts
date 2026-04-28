@@ -33,7 +33,7 @@ export const useLogin = () => {
             showToast(status as ToastStatus || 'success', message || 'Login berhasil!', 'Selamat datang kembali!');
             
             if (status === 'success') {
-                navigate('/dashboard');
+                navigate('/penghuni');
             }
         } catch (err) {
             let errorMessage = 'Login gagal. Silakan coba lagi.';

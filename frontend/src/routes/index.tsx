@@ -1,7 +1,12 @@
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+
+import MainLayout from '../components/layout/MainLayout';
+
+// Pages Section
 import Login from '../pages/Login';
 import Dashboard from '../pages/Dashboard';
-import MainLayout from '../components/layout/MainLayout';
+import MasterPenghuni from '../pages/Master/Penghuni';
+import MasterRumah from '../pages/Master/Rumah';
 
 const PrivateRoute = () => {
     const token = localStorage.getItem('access_token');
@@ -16,7 +21,12 @@ const AppRoutes = () => {
             <Route element={<PrivateRoute />}>
                 <Route element={<MainLayout />}>
                     <Route path="/dashboard" element={<Dashboard />} />
-                    {/* <Route path="/warga" element={<Warga />} /> */}
+                    <Route path="master" element={<Outlet />}>
+                        <Route path="penghuni" element={<MasterPenghuni />} />
+                        <Route path="rumah" element={<MasterRumah />} />
+                    </Route>
+                    <Route path="/penghuni" element={<MasterPenghuni />} />
+                    <Route path="/rumah" element={<MasterRumah />} />
                 </Route>
             </Route>
 

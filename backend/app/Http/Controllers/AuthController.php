@@ -18,7 +18,7 @@ class AuthController extends Controller
             return $this->res->json($validator->errors(), 422);
         }
 
-        $credentials = $req->only('email', 'password');
+        $credentials = $req->only(['email', 'password']);
 
         if (!$token = auth('api')->attempt($credentials)) {
             return $this->res->json([

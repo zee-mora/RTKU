@@ -43,6 +43,38 @@ const Sidebar: React.FC = () => {
                     <LayoutDashboard size={18} />
                     <span>Dashboard</span>
                 </NavLink>
+                {/* master Data */}
+                <div>
+                    <p className="px-3 py-2 text-xs font-semibold text-emerald-500 uppercase tracking-wide">
+                        Master Data
+                    </p>
+                </div>
+                <div className="pl-6 space-y-1">
+                    <NavLink
+                        to="/master/rumah"
+                        className={({ isActive }) =>
+                            `${linkBase} text-xs ${isActive ? 'bg-emerald-600 text-white' : 'text-emerald-800 hover:bg-emerald-50'}`
+                        }
+                    >
+                        <span>Rumah</span>
+                    </NavLink>
+                    <NavLink
+                        to="/master/penghuni"
+                        className={({ isActive }) =>
+                            `${linkBase} text-xs ${isActive ? 'bg-emerald-600 text-white' : 'text-emerald-800 hover:bg-emerald-50'}`
+                        }
+                    >
+                        <span>Penghuni</span>
+                    </NavLink>
+                    <NavLink
+                        to="/master/iuran"
+                        className={({ isActive }) =>
+                            `${linkBase} text-xs ${isActive ? 'bg-emerald-600 text-white' : 'text-emerald-800 hover:bg-emerald-50'}`
+                        }
+                    >
+                        <span>Iuran</span>
+                    </NavLink>
+                </div>
             </nav>
 
             <div className="mt-auto pt-4 border-t border-emerald-100">

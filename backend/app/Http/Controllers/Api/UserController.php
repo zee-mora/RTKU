@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\Datatables\Datatables;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -128,6 +129,22 @@ class UserController extends Controller
     public function index()
     {
         return response()->json(User::all(), 200);
+    }
+
+    /**
+     * Example DataTables endpoint using the Laravel-native helper.
+     */
+    public function datatables(Request $request)
+    {
+        return Datatables::method(
+            User::query(),
+            [
+                'name' => 'users.name',
+                'email' => 'users.email',
+                'created_at' => 'users.created_at',
+            ],
+            $request,
+        )->make();
     }
 
     /**
