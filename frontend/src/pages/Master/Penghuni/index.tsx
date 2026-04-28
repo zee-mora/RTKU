@@ -7,6 +7,7 @@ const MasterPenghuni: React.FC = () => {
             <PageContainer>
                 <h1 className="text-2xl font-bold mb-4">Master Data Penghuni</h1>
                 <p>Konten master data penghuni Anda di sini...</p>
+                <span>testing</span>
             </PageContainer>
         </>
     );
