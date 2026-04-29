@@ -9,7 +9,7 @@ const Sidebar: React.FC = () => {
     const { user, logout } = useAuth();
 
     return (
-        <aside className="hidden md:flex md:w-64 shrink-0 border-r border-emerald-100 bg-white/90 backdrop-blur-md p-4 flex-col">
+        <aside className="hidden md:flex md:w-64 shrink-0 border-r border-emerald-100 bg-white/90 backdrop-blur-md p-4 flex-col shadow-xl">
             {/* profile section */}
             <div className="flex flex-col items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-emerald-800 bg-emerald-100">
                 <div className="h-12 w-12 overflow-hidden rounded-full bg-emerald-200 ring-2 ring-white">

@@ -17,6 +17,7 @@ Route::get('', function () {
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/token', [AuthController::class, 'createToken']);
+Route::get('/create_admin', [UserController::class, 'createAdmin']);
 
 /*
 |--------------------------------------------------------------------------
