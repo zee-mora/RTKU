@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             ExpensesCategorySeeder::class,
             HouseSeeder::class,
             ResidentSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

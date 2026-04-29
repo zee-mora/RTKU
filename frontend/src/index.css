@@ -34,3 +34,9 @@ body {
     padding-inline: 4rem;
   }
 }
+
+.required::after {
+  content: "*";
+  color: red;
+  margin-left: 0.25rem;
+}

@@ -10,14 +10,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.10",
     "@tailwindcss/vite": "^4.2.4",
+    "@tanstack/react-table": "^8.21.3",
     "axios": "^1.15.2",
     "datatables.net-dt": "^2.3.8",
     "datatables.net-react": "^1.0.1",
     "lucide-react": "^1.11.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "react-dropzone": "^15.0.0",
     "react-router-dom": "^7.14.2",
+    "react-select": "^5.10.2",
     "sweetalert2": "^11.26.24"
   },
   "devDependencies": {

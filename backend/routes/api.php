@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\PenghuniController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
@@ -27,4 +28,8 @@ Route::get('/create_admin', [UserController::class, 'createAdmin']);
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/users/datatables', [UserController::class, 'datatables']);
+    Route::get('/residents/datatables', [PenghuniController::class, 'Datatable']);
+    Route::get('/residents/{id}', [PenghuniController::class, 'show']);
+    Route::post('/residents', [PenghuniController::class, 'store']);
+    Route::put('/residents/{id}', [PenghuniController::class, 'update']);
 });
