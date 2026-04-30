@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import PageContainer from "../../../components/layout/PageContainer";
 import Button from "../../../components/ui/Button";
 import DropzoneField from "../../../components/ui/DropzoneField.tsx";
 import InputForm from "../../../components/ui/InputForm";
 import SelectField from "../../../components/ui/SelectField";
-import type { Option } from "../../../components/ui/SelectField";
-import api from "../../../api/axios";
-import { showToast } from "../../../utils/alert";
-import { useNavigate, useParams } from "react-router-dom";
+import useFormPenghuni from "./UseForm";
 
 type ResidentPayload = {
   id?: number;
@@ -24,112 +21,27 @@ interface FormPenghuniProps {
 }
 
 const FormPenghuni: React.FC<FormPenghuniProps> = ({ initialData = null }) => {
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const residentId = id ? Number(id) : initialData?.id ?? null;
-  const isEditMode = Boolean(residentId);
-
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [fullname, setFullname] = useState(initialData?.fullname ?? "");
-  const [phoneNumber, setPhoneNumber] = useState(initialData?.phone_number ?? "");
-  const [residentStatus, setResidentStatus] = useState<string | null>(initialData?.resident_status ?? null);
-  const [maritalStatus, setMaritalStatus] = useState<string | null>(initialData?.marital_status ?? null);
-  const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(initialData?.photo_url ?? null);
-  const [initialLoading, setInitialLoading] = useState(Boolean(residentId));
-  const [loading, setLoading] = useState(false);
-
-  const StatusPernikahanOptions = [
-    { value: "Belum Menikah", label: "Belum Menikah" },
-    { value: "Sudah Menikah", label: "Sudah Menikah" },
-  ];
-
-  const StatusPenghuniOptions = [
-    { value: "Tetap", label: "Tetap" },
-    { value: "Kontrak", label: "Kontrak" },
-  ];
-
-  useEffect(() => {
-    if (!residentId || initialData) {
-      return;
-    }
-
-    const fetchResident = async () => {
-      setInitialLoading(true);
-
-      try {
-        const response = await api.get(`/residents/${residentId}`);
-        const resident = (response.data?.data ?? response.data) as ResidentPayload;
-
-        setFullname(resident.fullname ?? "");
-        setPhoneNumber(resident.phone_number ?? "");
-        setResidentStatus(resident.resident_status ?? null);
-        setMaritalStatus(resident.marital_status ?? null);
-        setExistingPhotoUrl(resident.photo_url ?? null);
-      } catch (err) {
-        console.error(err);
-        showToast('error', 'Gagal', 'Data penghuni tidak ditemukan atau gagal dimuat.');
-        navigate('/master/penghuni');
-      } finally {
-        setInitialLoading(false);
-      }
-    };
-
-    void fetchResident();
-  }, [residentId, initialData, navigate]);
-
-  const findOption = (opts: Option[], value?: string | null) => {
-    if (!value) return null;
-    return opts.find((o) => o.value === value) ?? null;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append('fullname', fullname);
-      formData.append('phone_number', phoneNumber);
-      formData.append('resident_status', residentStatus ?? 'Tetap');
-      formData.append('marital_status', maritalStatus ?? 'Belum Menikah');
-      if (photo) {
-        formData.append('photo', photo);
-      }
-
-      if (residentId) {
-        formData.append('_method', 'PUT');
-
-        await api.post(`/residents/${residentId}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-        showToast('success', 'Berhasil', 'Data penghuni berhasil diperbarui.');
-      } else {
-        await api.post('/residents', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-        showToast('success', 'Berhasil', 'Penghuni berhasil ditambahkan.');
-      }
-
-      navigate('/master/penghuni');
-    } catch (err: unknown) {
-      console.error(err);
-      let message = 'Terjadi kesalahan saat menyimpan data.';
-      if (typeof err === 'object' && err !== null) {
-        const maybeErr = err as Record<string, unknown>;
-        const response = maybeErr['response'] as Record<string, unknown> | undefined;
-        const data = response?.['data'] as Record<string, unknown> | undefined;
-        const msg = data?.['message'] as string | undefined;
-        if (msg) {
-          message = msg;
-        } else if (typeof maybeErr['message'] === 'string') {
-          message = maybeErr['message'] as string;
-        }
-      }
-      showToast('error', 'Gagal', String(message));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    isEditMode,
+    photo,
+    setPhoto,
+    fullname,
+    setFullname,
+    phoneNumber,
+    setPhoneNumber,
+    residentStatus,
+    setResidentStatus,
+    maritalStatus,
+    setMaritalStatus,
+    existingPhotoUrl,
+    initialLoading,
+    loading,
+    navigate,
+    StatusPernikahanOptions,
+    StatusPenghuniOptions,
+    findOption,
+    handleSubmit,
+  } = useFormPenghuni({ initialData });
 
   return (
     <PageContainer>
@@ -182,6 +94,7 @@ const FormPenghuni: React.FC<FormPenghuniProps> = ({ initialData = null }) => {
           <div className="md:col-span-2">
             <DropzoneField
               label="Foto"
+              height="12rem"
               required
               value={photo}
               previewUrl={existingPhotoUrl}

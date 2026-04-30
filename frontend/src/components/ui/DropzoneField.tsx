@@ -14,6 +14,7 @@ interface DropzoneFieldProps {
   disabled?: boolean;
   onFileChange?: (file: File | null) => void;
   value?: File | null;
+  height?: string;
 }
 
 const defaultAccept: Accept = {
@@ -41,6 +42,23 @@ const resolvePreviewUrl = (url: string | null) => {
   return `${baseUrl}${normalizedPath}`;
 };
 
+/**
+ * Komponen DropzoneField untuk mengunggah foto dengan fitur preview dan validasi.
+ *
+ * @param label - Label untuk field upload. Default adalah "Upload Foto".
+ * @param required - Menandakan apakah field ini wajib diisi. Default adalah false.
+ * @param helperText - Teks bantuan yang ditampilkan di bawah field. Default adalah "PNG, JPG, JPEG, WEBP. Maksimal 5 MB."
+ * @param error - Pesan error yang ditampilkan jika ada kesalahan validasi.
+ * @param previewUrl - URL untuk menampilkan preview gambar yang sudah ada (misalnya saat edit).
+ * @param accept - Tipe file yang diterima. Default adalah gambar dengan ekstensi PNG, JPG, JPEG, WEBP, GIF.
+ * @param maxFiles - Jumlah maksimal file yang dapat diunggah. Default adalah 1.
+ * @param maxSize - Ukuran maksimal file dalam byte. Default adalah 5 MB.
+ * @param disabled - Menandakan apakah field ini dalam keadaan non-aktif. Default adalah false.
+ * @param onFileChange - Callback yang dipanggil saat file berubah, menerima file yang dipilih atau null jika tidak ada.
+ * @param value - File yang saat ini dipilih. Default adalah null.
+ * @param height - CSS height value for the dropzone area (e.g., "200px", "10rem"). Default is "1rem". 
+ * @returns 
+ */
 const DropzoneField: React.FC<DropzoneFieldProps> = ({
   label = "Upload Foto",
   required = false,
@@ -53,6 +71,7 @@ const DropzoneField: React.FC<DropzoneFieldProps> = ({
   disabled = false,
   onFileChange,
   value = null,
+  height = "10rem",
 }) => {
   const selectedFile = value;
 
@@ -106,7 +125,7 @@ const DropzoneField: React.FC<DropzoneFieldProps> = ({
 
       <div
         {...getRootProps()}
-        className={`flex justify-center align-middle group cursor-pointer rounded-2xl border border-dashed bg-white h-[10rem] p-5 transition-all duration-200 ${
+        className={`flex justify-center align-middle group cursor-pointer rounded-2xl border border-dashed bg-white h-[${height}] p-5 transition-all duration-200 ${
           disabled
             ? "cursor-not-allowed border-gray-200 bg-gray-50 opacity-70"
             : error

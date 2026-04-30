@@ -112,6 +112,7 @@ class DatatablesBuilder
         }
 
         $rows = array_values(array_merge($this->prependRows, $rows, $this->appendRows));
+        $rows = $this->applyIndexing($rows);
 
         return array_merge([
             'draw' => (int) $this->request->input('draw', 0),
@@ -132,6 +133,30 @@ class DatatablesBuilder
         }
 
         return $query;
+    }
+
+    /**
+     * Add an "index" column to each row based on the request start offset.
+     *
+     * @param array<int, array<string,mixed>> $rows
+     * @return array<int, array<string,mixed>>
+     */
+    protected function applyIndexing(array $rows): array
+    {
+        $start = max(0, (int) $this->request->input('start', 0));
+
+        // Ensure columns contain an index column at the front
+        $hasIndex = collect($this->columns)->contains(fn (DatatablesColumn $column) => $column->data === 'index');
+
+        if (! $hasIndex) {
+            array_unshift($this->columns, new DatatablesColumn('index', 'index', searchable: false, orderable: false));
+        }
+
+        foreach (array_values($rows) as $i => $row) {
+            $rows[$i]['index'] = $start + $i + 1;
+        }
+
+        return $rows;
     }
 
     protected function applySearch(EloquentBuilder|QueryBuilder $query): void

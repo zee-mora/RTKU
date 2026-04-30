@@ -1,6 +1,4 @@
-"use no memo";
-
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -12,6 +10,7 @@ import {
 import type { ColumnDef, ColumnFiltersState, SortingState } from '@tanstack/react-table';
 import { ChevronUp, ChevronDown, Search, Loader } from 'lucide-react';
 import api from '../../api/axios';
+import { datatableRefetchRegistry } from './DatatableRegistry';
 
 interface DataTableProps<T> {
   columns: ColumnDef<T>[];
@@ -20,6 +19,7 @@ interface DataTableProps<T> {
   title?: string;
   searchPlaceholder?: string;
   enableServerSide?: boolean;
+  datatableKey?: string;
 }
 
 export default function DataTable<T>({
@@ -29,6 +29,7 @@ export default function DataTable<T>({
   title,
   searchPlaceholder = 'Cari...',
   enableServerSide = false,
+  datatableKey,
 }: DataTableProps<T>) {
   "use no memo";
 
@@ -41,48 +42,66 @@ export default function DataTable<T>({
   const [totalRecords, setTotalRecords] = useState(0);
   const [filteredRecords, setFilteredRecords] = useState(0);
 
-  useEffect(() => {
+  const fetchServerSideData = useCallback(async () => {
     if (!enableServerSide || !apiUrl) {
       return;
     }
 
-    const fetchServerSideData = async () => {
-      try {
-        setLoading(true);
+    try {
+      setLoading(true);
 
-        const params = new URLSearchParams({
-          draw: String(pagination.pageIndex + 1),
-          start: String(pagination.pageIndex * pagination.pageSize),
-          length: String(pagination.pageSize),
-          'search[value]': globalFilter,
+      const params = new URLSearchParams({
+        draw: String(pagination.pageIndex + 1),
+        start: String(pagination.pageIndex * pagination.pageSize),
+        length: String(pagination.pageSize),
+        'search[value]': globalFilter,
+      });
+
+      sorting.forEach((sort, index) => {
+        const columnIndex = columns.findIndex((column) => {
+          const accessorKey = (column as { accessorKey?: string }).accessorKey;
+          return typeof accessorKey === 'string' && accessorKey === sort.id;
         });
 
-        sorting.forEach((sort, index) => {
-          const columnIndex = columns.findIndex((column) => {
-            const accessorKey = (column as { accessorKey?: string }).accessorKey;
-            return typeof accessorKey === 'string' && accessorKey === sort.id;
-          });
+        if (columnIndex >= 0) {
+          params.append(`order[${index}][column]`, String(columnIndex));
+          params.append(`order[${index}][dir]`, sort.desc ? 'desc' : 'asc');
+        }
+      });
 
-          if (columnIndex >= 0) {
-            params.append(`order[${index}][column]`, String(columnIndex));
-            params.append(`order[${index}][dir]`, sort.desc ? 'desc' : 'asc');
-          }
-        });
+      const response = await api.get(`${apiUrl}?${params.toString()}`);
+      setData(response.data.data || []);
+      setTotalRecords(response.data.recordsTotal || 0);
+      setFilteredRecords(response.data.recordsFiltered || 0);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [apiUrl, columns, enableServerSide, globalFilter, pagination.pageIndex, pagination.pageSize, sorting]);
 
-        const response = await api.get(`${apiUrl}?${params.toString()}`);
-        setData(response.data.data || []);
-        setTotalRecords(response.data.recordsTotal || 0);
-        setFilteredRecords(response.data.recordsFiltered || 0);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
+  useEffect(() => {
+    void fetchServerSideData();
+  }, [fetchServerSideData]);
+
+  useEffect(() => {
+    if (!datatableKey || !enableServerSide || !apiUrl) {
+      return;
+    }
+
+    const triggerRefetch = () => {
+      void fetchServerSideData();
     };
 
-    void fetchServerSideData();
-  }, [apiUrl, columns, enableServerSide, globalFilter, pagination, sorting]);
+    datatableRefetchRegistry.set(datatableKey, triggerRefetch);
 
+    return () => {
+      if (datatableRefetchRegistry.get(datatableKey) === triggerRefetch) {
+        datatableRefetchRegistry.delete(datatableKey);
+      }
+    };
+  }, [apiUrl, datatableKey, enableServerSide, fetchServerSideData]);
+  
   const table = useReactTable({
     data,
     columns,

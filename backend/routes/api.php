@@ -32,4 +32,5 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/residents/{id}', [PenghuniController::class, 'show']);
     Route::post('/residents', [PenghuniController::class, 'store']);
     Route::put('/residents/{id}', [PenghuniController::class, 'update']);
+    Route::delete('/residents/{id}', [PenghuniController::class, 'destroy']);
 });

@@ -45,3 +45,49 @@ export const showToast = (icon: SweetAlertIcon, title: string, text: string) => 
         },
     });
 }
+
+export const showConfirmDialog = (title: string, text: string, confirmButtonText: string, cancelButtonText: string) => {
+    return Swal.fire({
+        title,
+        text,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#059669',
+        cancelButtonColor: '#ef4444',
+        confirmButtonText,
+        cancelButtonText,
+    });
+};
+
+export const showPrompt = (title: string, inputLabel: string, inputPlaceholder: string) => {
+    return Swal.fire({
+        title,
+        input: 'text',
+        inputLabel,
+        inputPlaceholder,
+        showCancelButton: true,
+        confirmButtonColor: '#059669',
+        cancelButtonColor: '#ef4444',
+    });
+};
+
+export const showCustomDialog = (htmlContent: string, confirmButtonText: string, cancelButtonText: string) => {
+    return Swal.fire({
+        html: htmlContent,
+        showCancelButton: true,
+        confirmButtonColor: '#059669',
+        cancelButtonColor: '#ef4444',
+        confirmButtonText,
+        cancelButtonText,
+    });
+};
+
+export const showLoading = (title: string) => {
+    Swal.fire({
+        title,
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        },
+    });
+};

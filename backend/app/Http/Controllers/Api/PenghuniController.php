@@ -141,4 +141,32 @@ class PenghuniController extends Controller
             ],
         ], 200);
     }
+
+    /**
+     * Delete existing resident
+     * @param int|string $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy($id)
+    {
+        if ($id != null) {
+            $resident = Mresidents::find($id);
+            if (!$resident) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Penghuni tidak ditemukan.',
+                ], 404);
+            }
+            $resident->delete();
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Penghuni berhasil dihapus.',
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'ID penghuni tidak valid.',
+            ], 400);
+        }
+    }
 }

@@ -6,6 +6,9 @@ import Button from "../../../components/ui/Button";
 import Breadcrumb from "../../../components/ui/Breadcrumb";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { showConfirmDialog, showToast } from "../../../utils/alert";
+import { triggerDatatableRefetch } from "../../../components/DataTable/DatatableRegistry";
+import api from "../../../api/axios";
 
 type Resident = {
   id: number;
@@ -22,8 +25,8 @@ const MasterPenghuni = () => {
   const columns = useMemo<ColumnDef<Resident>[]>(
     () => [
       {
-        accessorKey: "id",
-        header: "ID",
+        accessorKey: "index",
+        header: "NO",
       },
       {
         accessorKey: "fullname",
@@ -49,7 +52,7 @@ const MasterPenghuni = () => {
             <Button size="sm" variant="secondary" onClick={() => handleEditPenghuni(row.original.id)}>
               Edit
             </Button>
-            <Button size="sm" variant="danger" onClick={() => alert(`Hapus ${row.original.fullname}`)}>
+            <Button size="sm" variant="danger" onClick={() => handleDeletePenghuni(row.original.id)}>
               Hapus
             </Button>
           </div>
@@ -65,6 +68,24 @@ const MasterPenghuni = () => {
   function handleAddPenghuni()
   {
     navigate("/master/penghuni/add");
+  }
+
+  function handleDeletePenghuni(id: number) {
+    showConfirmDialog("Konfirmasi Hapus", "Apakah Anda yakin ingin menghapus penghuni ini?", "Ya, Hapus", "Batal")
+      .then((result) => {
+        if (result.isConfirmed) {
+          api.delete(`/residents/${id}`)
+            .then(() => {
+              showToast("success", "Penghuni berhasil dihapus.", "");
+              triggerDatatableRefetch("table-penghuni");
+            })
+            .catch(() => {
+              showToast("error", "Gagal menghapus penghuni. Silakan coba lagi.", "");
+            });
+        } else {
+          showToast("error", "Penghapusan dibatalkan.", "");
+        }
+      });
   }
 
   return (
@@ -83,9 +104,10 @@ const MasterPenghuni = () => {
 
         <DataTable
           columns={columns}
-          apiUrl="http://localhost:8000/api/residents/datatables"
+          apiUrl="residents/datatables"
           enableServerSide={true}
           searchPlaceholder="Cari data dari backend..."
+          datatableKey="table-penghuni"
         />
       </PageContainer>
     </>
