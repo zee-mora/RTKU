@@ -73,7 +73,7 @@ rtku/
 │   ├── database/    # Migrations & seeders
 │   ├── routes/      # API routes
 │   └── .env         # Environment variables
-├── frontend/        # Vue.js/React SPA
+├── frontend/        # ReactJs
 │   ├── src/        # Source code
 │   ├── public/     # Static assets
 │   └── .env        # Environment variables
