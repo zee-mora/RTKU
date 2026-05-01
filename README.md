@@ -229,7 +229,7 @@ cd frontend && npm run dev -- --port=5174
 
 ## 🗺️ Entity Relationship Diagram (ERD) And Feature Documentation
 
-You can find the ERD diagram and Feature in the `docs/` folder or view it [here](https://github.com/zee-mora/RTKU/blob/zeetest/docs/ERD.png).
+You can find the ERD diagram and Feature in the `docs/` folder or view it [here](https://github.com/zee-mora/RTKU/blob/zeetest/docs/ERD.png) and the Feature Documentation [here](https://github.com/zee-mora/RTKU/blob/zeetest/docs/FEATURES_DOCUMENTATION.md)
 
 ---
 ## 📝 Additional Resources
