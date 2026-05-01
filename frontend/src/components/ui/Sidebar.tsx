@@ -46,7 +46,7 @@ const Sidebar: React.FC = () => {
                 {/* master Data */}
                 <div>
                     <p className="px-3 py-2 text-xs font-semibold text-emerald-500 uppercase tracking-wide">
-                        Master Data
+                        Pengelolaan
                     </p>
                 </div>
                 <div className="pl-6 space-y-1">

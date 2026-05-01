@@ -59,6 +59,66 @@ class RumahController extends Controller
         )->make();
     }
 
+    public function history_Penghuni_dt(Request $request, int $id)
+    {
+        return Datatables::method(
+            DB::table('trhouse_residents as tr')
+                ->join('Mresidents as r', 'r.id', '=', 'tr.resident_id')
+                ->where('tr.house_id', $id)
+                ->select([
+                    'tr.id',
+                    'tr.house_id',
+                    'tr.resident_id',
+                    'r.fullname as resident_name',
+                    'tr.start_date',
+                    'tr.end_date',
+                    'tr.is_active',
+                ]),
+            [
+                'id',
+                'resident_name',
+                'start_date',
+                'end_date',
+                'is_active',
+            ],
+            $request,
+        )->make();
+    }
+
+    public function history_Pembayaran_dt(Request $request, int $id)
+    {
+        return Datatables::method(
+            DB::table('payments as p')
+                ->join('trhouse_residents as tr', 'tr.id', '=', 'p.trhouse_resident_id')
+                ->join('Mresidents as r', 'r.id', '=', 'tr.resident_id')
+                ->join('Mhouses as h', 'h.id', '=', 'tr.house_id')
+                ->where('h.id', $id)
+                ->select([
+                    'p.id',
+                    'p.trhouse_resident_id',
+                    'tr.resident_id',
+                    'r.fullname as resident_name',
+                    'p.type',
+                    'p.month',
+                    'p.year',
+                    'p.amount',
+                    'p.status',
+                    'p.paid_at',
+                ]),
+            [
+                'id',
+                'resident_name',
+                'type',
+                'month',
+                'year',
+                'amount',
+                'status',
+                'paid_at',
+            ],
+            $request,
+        )->make();
+    }
+
     public function show(int $id): JsonResponse
     {
         $house = Mhouse::query()->findOrFail($id);

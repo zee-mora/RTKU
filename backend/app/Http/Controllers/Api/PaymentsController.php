@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\Datatables\Datatables;
 use App\Http\Controllers\Controller;
 use App\Models\Payments;
 use App\Models\Trhouse_residents;
@@ -11,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-
+use App\Helpers\Constanta\PaymentsConst;
 class PaymentsController extends Controller
 {
     public function options(): JsonResponse
@@ -26,6 +27,7 @@ class PaymentsController extends Controller
                 return [
                     'id' => $occupancy->id,
                     'house_number' => $occupancy->house?->house_number,
+                    'resident_id' => $occupancy->resident_id,
                     'resident_name' => $occupancy->resident?->fullname,
                     'label' => trim(sprintf(
                         '%s - %s',
@@ -38,9 +40,17 @@ class PaymentsController extends Controller
         return response()->json(['data' => $options]);
     }
 
+    public function setLunas(Request $request, int $id): JsonResponse
+    {
+        $payment = Payments::query()->findOrFail($id);
+        $payment->update(['status' => PaymentsConst::LUNAS, 'paid_at' => now()]);
+
+        return response()->json(['message' => 'Status pembayaran diperbarui menjadi Lunas.', 'data' => $payment]);
+    }
+
     public function datatable(Request $request)
     {
-        return \App\Helpers\Datatables\Datatables::method(
+        return Datatables::method(
             DB::table('payments as p')
                 ->leftJoin('trhouse_residents as tr', 'tr.id', '=', 'p.trhouse_resident_id')
                 ->leftJoin('Mresidents as r', 'r.id', '=', 'tr.resident_id')
@@ -54,11 +64,22 @@ class PaymentsController extends Controller
                     'p.year',
                     'p.status',
                     'p.paid_at',
+                    'r.id as resident_id',
                     'r.fullname as resident_name',
                     'h.house_number as house_number',
                 ]),
             [
-                'id', 'resident_name', 'house_number', 'type', 'month', 'year', 'amount', 'status', 'paid_at'
+                'id',
+                'trhouse_resident_id',
+                'resident_id',
+                'resident_name',
+                'house_number',
+                'type',
+                'month',
+                'year',
+                'amount',
+                'status',
+                'paid_at'
             ],
             $request,
         )->make();
@@ -73,11 +94,11 @@ class PaymentsController extends Controller
             'month' => ['required', 'integer', 'between:1,12'],
             'year' => ['required', 'integer'],
             'status' => ['required', 'in:Lunas,Belum Bayar'],
-            'periods' => ['nullable', 'integer', 'between:1,12'],
+            'period' => ['nullable', 'integer', 'between:1,12'],
             'paid_at' => ['nullable', 'date'],
         ]);
 
-        $periods = (int) ($validated['periods'] ?? 1);
+        $periods = (int) ($validated['period'] ?? 1);
         $periods = max(1, min(12, $periods));
 
         if ($validated['type'] === 'Satpam' && $periods !== 1) {
@@ -105,6 +126,7 @@ class PaymentsController extends Controller
                     'type' => $validated['type'],
                     'month' => (int) $periodDate->month,
                     'year' => (int) $periodDate->year,
+                    'period' => $periods,
                     'status' => $validated['status'],
                     'paid_at' => $validated['status'] === 'Lunas' ? ($validated['paid_at'] ?? now()) : null,
                 ]);
@@ -130,7 +152,16 @@ class PaymentsController extends Controller
             'year' => ['required', 'integer'],
             'status' => ['required', 'in:Lunas,Belum Bayar'],
             'paid_at' => ['nullable', 'date'],
+            'period' => ['nullable', 'integer', 'between:1,12'],
         ]);
+
+        if ($validated['status'] === 'Lunas') {
+            if ($payment->status !== 'Lunas') {
+                $validated['paid_at'] = $validated['paid_at'] ?? now();
+            }
+        } else {
+            $validated['paid_at'] = null;
+        }
 
         $payment->update($validated);
 
@@ -187,7 +218,12 @@ class PaymentsController extends Controller
             ->where('payments.year', $year)
             ->where('payments.month', $month)
             ->select([
-                'payments.id', 'payments.amount', 'payments.type', 'payments.status', 'payments.paid_at', 'r.fullname as resident_name'
+                'payments.id',
+                'payments.amount',
+                'payments.type',
+                'payments.status',
+                'payments.paid_at',
+                'r.fullname as resident_name'
             ])
             ->get();
 

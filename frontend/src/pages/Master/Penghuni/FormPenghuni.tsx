@@ -41,6 +41,7 @@ const FormPenghuni: React.FC<FormPenghuniProps> = ({ initialData = null }) => {
     StatusPenghuniOptions,
     findOption,
     handleSubmit,
+    validationErrors,
   } = useFormPenghuni({ initialData });
 
   return (
@@ -57,50 +58,74 @@ const FormPenghuni: React.FC<FormPenghuniProps> = ({ initialData = null }) => {
       <form onSubmit={handleSubmit} className="rounded-xl bg-white">
         {/* Form Grid */}
         <div className="grid gap-6 md:grid-cols-2">
-          <InputForm
-            type="text"
-            label="Nama Lengkap"
-            required
-            placeholder="Masukkan nama lengkap"
-            value={fullname}
-            onChange={(e) => setFullname(e.target.value)}
-          />
+          <div>
+            <InputForm
+              type="text"
+              label="Nama Lengkap"
+              required
+              placeholder="Masukkan nama lengkap"
+              value={fullname}
+              onChange={(e) => setFullname(e.target.value)}
+            />
+            {validationErrors.fullname && (
+              <p className="mt-1 text-sm text-red-500">{validationErrors.fullname}</p>
+            )}
+          </div>
 
-          <InputForm
-            type="text"
-            label="No. HP"
-            required
-            placeholder="Masukkan nomor HP"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-          />
+          <div>
+            <InputForm
+              type="text"
+              label="No. HP"
+              required
+              placeholder="Masukkan nomor HP"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+            />
+            {validationErrors.phone_number && (
+              <p className="mt-1 text-sm text-red-500">{validationErrors.phone_number}</p>
+            )}
+          </div>
 
-          <SelectField
-            label="Status Pernikahan"
-            required
-            options={StatusPernikahanOptions}
-            value={findOption(StatusPernikahanOptions, maritalStatus)}
-            onChange={(val) => setMaritalStatus(val?.value ?? null)}
-          />
+          <div>
+            <SelectField
+              label="Status Pernikahan"
+              required
+              options={StatusPernikahanOptions}
+              value={findOption(StatusPernikahanOptions, maritalStatus)}
+              onChange={(val) => setMaritalStatus(val?.value ?? null)}
+            />
+            {validationErrors.marital_status && (
+              <p className="mt-1 text-sm text-red-500">{validationErrors.marital_status}</p>
+            )}
+          </div>
 
-          <SelectField
-            label="Status Penghuni"
-            required
-            options={StatusPenghuniOptions}
-            value={findOption(StatusPenghuniOptions, residentStatus)}
-            onChange={(val) => setResidentStatus(val?.value ?? null)}
-          />
+          <div>
+            <SelectField
+              label="Status Penghuni"
+              required
+              options={StatusPenghuniOptions}
+              value={findOption(StatusPenghuniOptions, residentStatus)}
+              onChange={(val) => setResidentStatus(val?.value ?? null)}
+            />
+            {validationErrors.resident_status && (
+              <p className="mt-1 text-sm text-red-500">{validationErrors.resident_status}</p>
+            )}
+          </div>
 
           <div className="md:col-span-2">
             <DropzoneField
-              label="Foto"
+              label="Upload Foto KTP"
               height="12rem"
               required
+              accept={{ 'image/*': ['.png', '.jpg', '.jpeg'] }}
               value={photo}
               previewUrl={existingPhotoUrl}
               onFileChange={setPhoto}
-              helperText="Format gambar yang didukung: PNG, JPG, JPEG, WEBP, GIF."
+              helperText="Format gambar yang didukung: PNG, JPG, JPEG. Ukuran maksimal: 5MB."
             />
+            {validationErrors.photo && (
+              <p className="mt-1 text-sm text-red-500">{validationErrors.photo}</p>
+            )}
           </div>
         </div>
 

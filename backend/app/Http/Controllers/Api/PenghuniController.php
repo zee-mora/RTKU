@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Datatables\Datatables;
 use App\Http\Controllers\Controller;
+use App\Models\Mhouse;
 use App\Models\Mresidents;
 
 use Illuminate\Http\Request;
@@ -43,6 +44,10 @@ class PenghuniController extends Controller
         ], 200);
     }
 
+    /**
+     * Get Residents datatable
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function Datatable(Request $request)
     {
         return Datatables::method(
@@ -59,11 +64,11 @@ class PenghuniController extends Controller
         )->make();
     }
 
-    public function Add(Request $req)
-    {
-        return $this->store($req);
-    }
-
+    /**
+     * Store new data resident function
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -105,7 +110,7 @@ class PenghuniController extends Controller
     }
 
     /**
-     * Update existing resident
+     * Update existing resident function
      * @param Request $request
      * @param int $id
      * @return \Illuminate\Http\JsonResponse
@@ -159,24 +164,22 @@ class PenghuniController extends Controller
      */
     public function destroy($id)
     {
-        if ($id != null) {
-            $resident = Mresidents::find($id);
-            if (!$resident) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Penghuni tidak ditemukan.',
-                ], 404);
+        if ($id != null){
+            $resident = Mresidents::findOrFail($id);
+            if ($resident->ktp_path) {
+                Storage::disk('public')->delete($resident->ktp_path);
+            }
+            $house = Mhouse::query()->where('is_occupied', true)->whereHas('currentOccupancy', function ($query) use ($resident) {
+                $query->where('resident_id', $resident->id);
+            })->first();
+            if ($house) {
+                $house->is_occupied = false;
+                $house->save();
             }
             $resident->delete();
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Penghuni berhasil dihapus.',
-            ], 200);
+            return response()->json(['message' => 'Penghuni berhasil dihapus.']);
         } else {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'ID penghuni tidak valid.',
-            ], 400);
+            return response()->json(['message' => 'ID penghuni tidak valid.'], 400);
         }
     }
 }

@@ -78,6 +78,8 @@ type HouseFormState = {
   resident_id: number | null;
 };
 
+type RumahTab = "manajemen" | "riwayat";
+
 const occupancyOptions: Option[] = [
   { value: "true", label: "Dihuni" },
   { value: "false", label: "Tidak dihuni" },
@@ -119,6 +121,7 @@ const MasterRumah = () => {
   const [saving, setSaving] = useState(false);
   const [selectedHouse, setSelectedHouse] = useState<HouseDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<RumahTab>("manajemen");
 
   const loadResidents = useCallback(async () => {
     setResidentLoading(true);
@@ -154,8 +157,17 @@ const MasterRumah = () => {
   }, []);
 
   useEffect(() => {
-    void loadResidents();
+    const timer = setTimeout(() => {
+      void loadResidents();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [loadResidents]);
+
+  const openHistoryTab = useCallback((houseId: number) => {
+    setActiveTab("riwayat");
+    void loadHouseDetail(houseId);
+  }, [loadHouseDetail]);
 
   const statusValue = useMemo(() => occupancyOptions.find((option) => option.value === String(form.is_occupied)) ?? null, [form.is_occupied]);
   const selectedResidentValue = useMemo(
@@ -180,9 +192,8 @@ const MasterRumah = () => {
         header: "Status Rumah",
         cell: ({ row }) => (
           <span
-            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-              row.original.is_occupied ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
-            }`}
+            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${row.original.is_occupied ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+              }`}
           >
             {row.original.occupancy_status_label}
           </span>
@@ -210,6 +221,7 @@ const MasterRumah = () => {
                   is_occupied: Boolean(row.original.is_occupied),
                   resident_id: row.original.current_resident_id,
                 });
+                setActiveTab("manajemen");
 
                 void loadHouseDetail(row.original.id);
               }}
@@ -220,7 +232,7 @@ const MasterRumah = () => {
               size="sm"
               variant="primary"
               Icon={Eye}
-              onClick={() => void loadHouseDetail(row.original.id)}
+              onClick={() => openHistoryTab(row.original.id)}
             >
               Detail
             </Button>
@@ -228,7 +240,92 @@ const MasterRumah = () => {
         ),
       },
     ],
-    [loadHouseDetail],
+    [loadHouseDetail, openHistoryTab],
+  );
+
+  const occupancyHistoryColumns = useMemo<ColumnDef<OccupancyHistory>[]>(
+    () => [
+      {
+        id: "no",
+        header: "No",
+        cell: ({ row }) => row.index + 1,
+      },
+      {
+        accessorKey: "resident_name",
+        header: "Penghuni",
+        cell: ({ row }) => row.original.resident_name ?? "-",
+      },
+      {
+        accessorKey: "start_date",
+        header: "Mulai",
+        cell: ({ row }) => formatDate(row.original.start_date),
+      },
+      {
+        accessorKey: "end_date",
+        header: "Selesai",
+        cell: ({ row }) => (row.original.end_date ? formatDate(row.original.end_date) : "Masih dihuni"),
+      },
+      {
+        accessorKey: "is_active",
+        header: "Status",
+        cell: ({ row }) => (
+          <span
+            className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${row.original.is_active ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+              }`}
+          >
+            {row.original.is_active ? "Aktif" : "Riwayat"}
+          </span>
+        ),
+      },
+    ],
+    [],
+  );
+
+  const paymentHistoryColumns = useMemo<ColumnDef<PaymentHistory>[]>(
+    () => [
+      {
+        id: "no",
+        header: "No",
+        cell: ({ row }) => row.index + 1,
+      },
+      {
+        id: "period",
+        header: "Periode",
+        cell: ({ row }) => `${monthLabels[row.original.month - 1] ?? "-"} ${row.original.year}`,
+      },
+      {
+        accessorKey: "resident_name",
+        header: "Penghuni",
+        cell: ({ row }) => row.original.resident_name ?? "-",
+      },
+      {
+        accessorKey: "type",
+        header: "Tipe",
+      },
+      {
+        accessorKey: "amount",
+        header: "Nominal",
+        cell: ({ row }) => currencyFormatter.format(Number(row.original.amount)),
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => (
+          <div>
+            <span
+              className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${row.original.status === "Lunas" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
+                }`}
+            >
+              {row.original.status}
+            </span>
+            {row.original.paid_at ? (
+              <p className="mt-1 text-xs text-slate-400">Dibayar {formatDate(row.original.paid_at)}</p>
+            ) : null}
+          </div>
+        ),
+      },
+    ],
+    [],
   );
 
   const resetForm = () => {
@@ -273,7 +370,7 @@ const MasterRumah = () => {
   const paymentHistory = selectedHouse?.payment_history ?? [];
 
   return (
-    <PageContainer className="space-y-8 bg-gradient-to-br from-white via-emerald-50/40 to-slate-50">
+    <PageContainer className="space-y-8 bg-linear-to-br from-white via-emerald-50/40 to-slate-50">
       <Breadcrumb items={[{ label: "Master" }, { label: "Rumah" }]} />
 
       <div className="space-y-2">
@@ -290,254 +387,272 @@ const MasterRumah = () => {
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <form onSubmit={handleSubmit} className="rounded-3xl border border-white/70 bg-white p-6 shadow-sm shadow-slate-200/60">
-          <div className="mb-6 flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-semibold text-slate-900">
-                {form.id ? "Ubah Rumah" : "Tambah Rumah"}
-              </h2>
-              <p className="text-sm text-slate-500">
-                Status dihuni akan otomatis membentuk history penghuni aktif di tabel riwayat.
-              </p>
-            </div>
-            <Button type="button" variant="secondary" Icon={RefreshCw} onClick={resetForm}>
-              Reset
-            </Button>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-2">
-            <InputForm
-              label="Nomor Rumah"
-              required
-              placeholder="Contoh: A-01"
-              value={form.house_number}
-              onChange={(event) => setForm((current) => ({ ...current, house_number: event.target.value }))}
-            />
-
-            <InputForm
-              label="Alamat Detail"
-              placeholder="Blok, jalan, atau patokan alamat"
-              value={form.address_detail}
-              onChange={(event) => setForm((current) => ({ ...current, address_detail: event.target.value }))}
-            />
-
-            <SelectField
-              label="Status Hunian"
-              required
-              options={occupancyOptions}
-              value={statusValue}
-              onChange={(option) => {
-                const occupied = option?.value === "true";
-
-                setForm((current) => ({
-                  ...current,
-                  is_occupied: occupied,
-                  resident_id: occupied ? current.resident_id : null,
-                }));
-              }}
-              placeholder="Pilih status hunian"
-              isClearable={false}
-            />
-
-            <SelectField
-              label="Penghuni Aktif"
-              required={form.is_occupied}
-              options={residentOptions}
-              value={selectedResidentValue}
-              onChange={(option) =>
-                setForm((current) => ({
-                  ...current,
-                  resident_id: option ? Number(option.value) : null,
-                }))
-              }
-              placeholder={form.is_occupied ? "Pilih penghuni rumah" : "Pilih status dihuni dulu"}
-              isDisabled={!form.is_occupied || residentLoading}
-              helperText={
-                form.is_occupied
-                  ? "Saat status dihuni, pilih penghuni aktif agar history hunian tercatat otomatis."
-                  : "Jika tidak dihuni, penghuni aktif akan dikosongkan dan history lama tetap tersimpan."
-              }
-            />
-          </div>
-
-          <div className="mt-6 flex flex-wrap items-center justify-end gap-3 border-t border-slate-100 pt-6">
-            <Button type="button" variant="secondary" onClick={resetForm} disabled={saving}>
-              Batal
-            </Button>
-            <Button type="submit" variant="primary" disabled={saving}>
-              {saving ? "Menyimpan..." : form.id ? "Perbarui Rumah" : "Simpan Rumah"}
-            </Button>
-          </div>
-        </form>
-
-        <section className="rounded-3xl border border-white/70 bg-slate-950 p-6 text-white shadow-sm shadow-slate-300/60">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-[0.2em] text-emerald-300">Ringkasan rumah terpilih</p>
-              <h2 className="mt-1 text-xl font-semibold">
-                {selectedHouse ? selectedHouse.house_number : "Belum ada rumah dipilih"}
-              </h2>
-            </div>
-            <div className="rounded-2xl bg-white/10 p-3 text-emerald-300">
-              <CalendarClock size={20} />
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-4">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-400">Status hunian</p>
-              <p className="mt-1 text-lg font-semibold">
-                {selectedHouse?.occupancy_status_label ?? "-"}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-400">Penghuni aktif</p>
-              <p className="mt-1 text-lg font-semibold">
-                {selectedHouse?.current_resident?.fullname ?? "Tidak dihuni"}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-wide text-slate-400">Alamat</p>
-              <p className="mt-1 text-sm text-slate-200">
-                {selectedHouse?.address_detail ?? "-"}
-              </p>
-            </div>
-          </div>
-
-          {detailLoading ? (
-            <div className="mt-5 text-sm text-slate-300">Memuat detail rumah...</div>
-          ) : null}
-        </section>
-      </div>
-
-      <section className="rounded-3xl border border-white/70 bg-white p-6 shadow-sm shadow-slate-200/60">
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900">Daftar Rumah</h2>
-            <p className="text-sm text-slate-500">Gunakan tabel ini untuk edit data rumah atau membuka riwayat penghuni dan pembayaran.</p>
-          </div>
-          <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">
-            <Users size={16} />
-            {residentLoading ? "Memuat penghuni..." : `${residentOptions.length} penghuni tersedia`}
-          </div>
+      <section className="rounded-3xl border border-white/70 bg-white p-2 shadow-sm shadow-slate-200/60">
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab("manajemen")}
+            className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${activeTab === "manajemen"
+              ? "bg-emerald-600 text-white"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+          >
+            Manajemen Rumah
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("riwayat")}
+            className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${activeTab === "riwayat"
+              ? "bg-emerald-600 text-white"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+          >
+            Riwayat
+          </button>
         </div>
-
-        <DataTable
-          columns={columns}
-          apiUrl="houses/datatables"
-          enableServerSide={true}
-          searchPlaceholder="Cari nomor rumah, alamat, atau penghuni..."
-          datatableKey="table-rumah"
-        />
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <section className="rounded-3xl border border-white/70 bg-white p-6 shadow-sm shadow-slate-200/60">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
-              <Users size={18} />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-slate-900">History Penghuni</h2>
-              <p className="text-sm text-slate-500">Catatan perpindahan penghuni pada rumah yang dipilih.</p>
-            </div>
+      {activeTab === "manajemen" ? (
+        <>
+          <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+            <form onSubmit={handleSubmit} className="rounded-3xl border border-white/70 bg-white p-6 shadow-sm shadow-slate-200/60">
+              <div className="mb-6 flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    {form.id ? "Ubah Rumah" : "Tambah Rumah"}
+                  </h2>
+                  <p className="text-sm text-slate-500">
+                    Status dihuni akan otomatis membentuk history penghuni
+                  </p>
+                </div>
+                <Button type="button" variant="secondary" Icon={RefreshCw} onClick={resetForm}>
+                  Reset
+                </Button>
+              </div>
+
+              <div className="grid gap-5 md:grid-cols-2">
+                <InputForm
+                  label="Nomor Rumah"
+                  required
+                  placeholder="Contoh: A-01"
+                  value={form.house_number}
+                  onChange={(event) => setForm((current) => ({ ...current, house_number: event.target.value }))}
+                />
+
+                <InputForm
+                  label="Alamat Detail"
+                  placeholder="Blok, jalan, atau patokan alamat"
+                  value={form.address_detail}
+                  onChange={(event) => setForm((current) => ({ ...current, address_detail: event.target.value }))}
+                />
+
+                <SelectField
+                  label="Status Hunian"
+                  required
+                  options={occupancyOptions}
+                  value={statusValue}
+                  onChange={(option) => {
+                    const occupied = option?.value === "true";
+
+                    setForm((current) => ({
+                      ...current,
+                      is_occupied: occupied,
+                      resident_id: occupied ? current.resident_id : null,
+                    }));
+                  }}
+                  placeholder="Pilih status hunian"
+                  isClearable={false}
+                />
+
+                <SelectField
+                  label="Penghuni Aktif"
+                  required={form.is_occupied}
+                  options={residentOptions}
+                  value={selectedResidentValue}
+                  onChange={(option) =>
+                    setForm((current) => ({
+                      ...current,
+                      resident_id: option ? Number(option.value) : null,
+                    }))
+                  }
+                  placeholder={form.is_occupied ? "Pilih penghuni rumah" : "Pilih status dihuni dulu"}
+                  isDisabled={!form.is_occupied || residentLoading}
+                  helperText={
+                    form.is_occupied
+                      ? "Saat status dihuni, pilih penghuni aktif agar history hunian tercatat otomatis."
+                      : "Jika tidak dihuni, penghuni aktif akan dikosongkan dan history lama tetap tersimpan."
+                  }
+                />
+              </div>
+
+              <div className="mt-6 flex flex-wrap items-center justify-end gap-3 border-t border-slate-100 pt-6">
+                <Button type="button" variant="secondary" onClick={resetForm} disabled={saving}>
+                  Batal
+                </Button>
+                <Button type="submit" variant="primary" disabled={saving}>
+                  {saving ? "Menyimpan..." : form.id ? "Perbarui Rumah" : "Simpan Rumah"}
+                </Button>
+              </div>
+            </form>
+
+            <section className="rounded-3xl border border-white/70 bg-slate-950 p-6 text-white shadow-sm shadow-slate-300/60">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.2em] text-emerald-300">Ringkasan rumah terpilih</p>
+                  <h2 className="mt-1 text-xl font-semibold">
+                    {selectedHouse ? selectedHouse.house_number : "Belum ada rumah dipilih"}
+                  </h2>
+                </div>
+                <div className="rounded-2xl bg-white/10 p-3 text-emerald-300">
+                  <CalendarClock size={20} />
+                </div>
+              </div>
+
+              <div className="mt-6 grid gap-4">
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs uppercase tracking-wide text-slate-400">Status hunian</p>
+                  <p className="mt-1 text-lg font-semibold">
+                    {selectedHouse?.occupancy_status_label ?? "-"}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs uppercase tracking-wide text-slate-400">Penghuni aktif</p>
+                  <p className="mt-1 text-lg font-semibold">
+                    {selectedHouse?.current_resident?.fullname ?? "Tidak dihuni"}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-xs uppercase tracking-wide text-slate-400">Alamat</p>
+                  <p className="mt-1 text-sm text-slate-200">
+                    {selectedHouse?.address_detail ?? "-"}
+                  </p>
+                </div>
+              </div>
+
+              {detailLoading ? (
+                <div className="mt-5 text-sm text-slate-300">Memuat detail rumah...</div>
+              ) : null}
+            </section>
           </div>
 
-          {occupancyHistory.length > 0 ? (
-            <div className="overflow-hidden rounded-2xl border border-slate-100">
-              <table className="min-w-full divide-y divide-slate-100 text-sm">
-                <thead className="bg-slate-50 text-slate-600">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-semibold">Penghuni</th>
-                    <th className="px-4 py-3 text-left font-semibold">Mulai</th>
-                    <th className="px-4 py-3 text-left font-semibold">Selesai</th>
-                    <th className="px-4 py-3 text-left font-semibold">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
-                  {occupancyHistory.map((item) => (
-                    <tr key={item.id}>
-                      <td className="px-4 py-3 font-medium text-slate-800">{item.resident_name ?? "-"}</td>
-                      <td className="px-4 py-3 text-slate-600">{formatDate(item.start_date)}</td>
-                      <td className="px-4 py-3 text-slate-600">{item.end_date ? formatDate(item.end_date) : "Masih dihuni"}</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                            item.is_active ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
-                          }`}
-                        >
-                          {item.is_active ? "Aktif" : "Riwayat"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <section className="rounded-3xl border border-white/70 bg-white p-6 shadow-sm shadow-slate-200/60">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900">Daftar Rumah</h2>
+                <p className="text-sm text-slate-500">Gunakan tabel ini untuk edit data rumah atau membuka riwayat penghuni dan pembayaran.</p>
+              </div>
+              <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">
+                <Users size={16} />
+                {residentLoading ? "Memuat penghuni..." : `${residentOptions.length} penghuni tersedia`}
+              </div>
             </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
-              Belum ada riwayat penghuni untuk rumah ini.
-            </div>
-          )}
-        </section>
 
-        <section className="rounded-3xl border border-white/70 bg-white p-6 shadow-sm shadow-slate-200/60">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
-              <Building2 size={18} />
+            <DataTable
+              columns={columns}
+              apiUrl="houses/datatables"
+              enableServerSide={true}
+              searchPlaceholder="Cari nomor rumah, alamat, atau penghuni..."
+              datatableKey="table-rumah"
+            />
+          </section>
+        </>
+      ) : (
+        <div id="tab-riwayat" className="space-y-6">
+          <section className="rounded-3xl border border-white/70 bg-slate-950 p-6 text-white shadow-sm shadow-slate-300/60">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm uppercase tracking-[0.2em] text-emerald-300">Ringkasan rumah terpilih</p>
+                <h2 className="mt-1 text-xl font-semibold">
+                  {selectedHouse ? selectedHouse.house_number : "Belum ada rumah dipilih"}
+                </h2>
+              </div>
+              <div className="rounded-2xl bg-white/10 p-3 text-emerald-300">
+                <CalendarClock size={20} />
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-slate-900">History Pembayaran</h2>
-              <p className="text-sm text-slate-500">Menampilkan siapa yang harus membayar, nominal, dan status lunas atau belum.</p>
+
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-xs uppercase tracking-wide text-slate-400">Status hunian</p>
+                <p className="mt-1 text-lg font-semibold">
+                  {selectedHouse?.occupancy_status_label ?? "-"}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-xs uppercase tracking-wide text-slate-400">Penghuni aktif</p>
+                <p className="mt-1 text-lg font-semibold">
+                  {selectedHouse?.current_resident?.fullname ?? "Tidak dihuni"}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-xs uppercase tracking-wide text-slate-400">Alamat</p>
+                <p className="mt-1 text-sm text-slate-200">
+                  {selectedHouse?.address_detail ?? "-"}
+                </p>
+              </div>
             </div>
+
+            {detailLoading ? (
+              <div className="mt-5 text-sm text-slate-300">Memuat detail rumah...</div>
+            ) : null}
+          </section>
+
+          <div className="grid gap-6 xl:grid-cols-2">
+            <section className="rounded-3xl border border-white/70 bg-white p-6 shadow-sm shadow-slate-200/60">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
+                  <CalendarClock size={18} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900">History Hunian</h2>
+                  <p className="text-sm text-slate-500">Menampilkan siapa saja penghuni rumah ini dari waktu ke waktu beserta periode hunian mereka.</p>
+                </div>
+              </div>
+
+              {occupancyHistory.length > 0 ? (
+                <div className="overflow-x-auto rounded-2xl border border-slate-100">
+                  <DataTable
+                    columns={occupancyHistoryColumns}
+                    data={occupancyHistory}
+                    searchPlaceholder="cari data hunian..."
+                    enableServerSide={false}
+                  />
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
+                  Belum ada history hunian untuk rumah ini.
+                </div>
+              )}
+            </section>
+            <section className="rounded-3xl border border-white/70 bg-white p-6 shadow-sm shadow-slate-200/60">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+                  <Building2 size={18} />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-900">History Pembayaran</h2>
+                  <p className="text-sm text-slate-500">Menampilkan siapa yang harus membayar, nominal, dan status lunas atau belum.</p>
+                </div>
+              </div>
+
+              {paymentHistory.length > 0 ? (
+                <div className="overflow-x-auto rounded-2xl border border-slate-100">
+                  <DataTable
+                    columns={paymentHistoryColumns}
+                    data={paymentHistory}
+                    searchPlaceholder="cari data pembayaran..."
+                    enableServerSide={false}
+                  />
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
+                  Belum ada history pembayaran untuk rumah ini.
+                </div>
+              )}
+            </section>
           </div>
-
-          {paymentHistory.length > 0 ? (
-            <div className="overflow-x-auto rounded-2xl border border-slate-100">
-              <table className="min-w-full divide-y divide-slate-100 text-sm">
-                <thead className="bg-slate-50 text-slate-600">
-                  <tr>
-                    <th className="px-4 py-3 text-left font-semibold">Periode</th>
-                    <th className="px-4 py-3 text-left font-semibold">Penghuni</th>
-                    <th className="px-4 py-3 text-left font-semibold">Tipe</th>
-                    <th className="px-4 py-3 text-left font-semibold">Nominal</th>
-                    <th className="px-4 py-3 text-left font-semibold">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
-                  {paymentHistory.map((item) => (
-                    <tr key={item.id}>
-                      <td className="px-4 py-3 font-medium text-slate-800">
-                        {monthLabels[item.month - 1]} {item.year}
-                      </td>
-                      <td className="px-4 py-3 text-slate-600">{item.resident_name ?? "-"}</td>
-                      <td className="px-4 py-3 text-slate-600">{item.type}</td>
-                      <td className="px-4 py-3 text-slate-600">{currencyFormatter.format(Number(item.amount))}</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-                            item.status === "Lunas" ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"
-                          }`}
-                        >
-                          {item.status}
-                        </span>
-                        {item.paid_at ? (
-                          <p className="mt-1 text-xs text-slate-400">Dibayar {formatDate(item.paid_at)}</p>
-                        ) : null}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
-              Belum ada history pembayaran untuk rumah ini.
-            </div>
-          )}
-        </section>
-      </div>
+        </div>
+      )}
     </PageContainer>
   );
 };

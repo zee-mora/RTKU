@@ -101,7 +101,6 @@ const Dashboard: React.FC = () => {
     maximumFractionDigits: 0,
   });
 
-  // Prepare pie chart data
   const incomeData = Object.entries(incomeExpense?.income_by_type || {}).map(([name, value]) => ({
     name,
     value: value as number,
@@ -112,7 +111,6 @@ const Dashboard: React.FC = () => {
     value: value as number,
   }));
 
-  // Map monthly data with labels
   const chartData = monthlyData.map((d) => ({
     ...d,
     monthLabel: monthLabels[d.month - 1],
@@ -121,7 +119,6 @@ const Dashboard: React.FC = () => {
   return (
     <PageContainer>
       <div className="space-y-8">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
@@ -155,9 +152,8 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Statistics Cards */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-          <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="rounded-lg border-white bg-white p-6 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 font-medium">Total Rumah</p>
@@ -169,7 +165,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="rounded-lg border-white bg-white p-6 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 font-medium">Rumah Dihuni</p>
@@ -181,7 +177,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="rounded-lg border-white bg-white p-6 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 font-medium">Rumah Kosong</p>
@@ -193,7 +189,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="rounded-lg border-white bg-white p-6 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 font-medium">Total Penghuni</p>
@@ -205,7 +201,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="rounded-lg border-white bg-white p-6 shadow-2xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-500 font-medium">Penghuni Aktif</p>
@@ -220,7 +216,7 @@ const Dashboard: React.FC = () => {
 
         {/* Financial Summary */}
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="rounded-lg border bg-gradient-to-br from-green-50 to-white p-6 shadow-sm">
+          <div className="rounded-lg shadow-2xl bg-gradient-to-br from-green-50 to-white p-6 ">
             <p className="text-sm text-gray-600 font-medium">Pemasukan Bulan Ini (Lunas)</p>
             <p className="text-3xl font-bold text-green-600 mt-2">
               {currencyFormatter.format(stats.current_month.paid_income)}
@@ -230,7 +226,7 @@ const Dashboard: React.FC = () => {
             </p>
           </div>
 
-          <div className="rounded-lg border bg-gradient-to-br from-orange-50 to-white p-6 shadow-sm">
+          <div className="rounded-lg shadow-2xl bg-gradient-to-br from-orange-50 to-white p-6 ">
             <p className="text-sm text-gray-600 font-medium">Tunggakan Pembayaran</p>
             <p className="text-3xl font-bold text-orange-600 mt-2">
               {currencyFormatter.format(stats.current_month.outstanding_total)}
@@ -240,7 +236,7 @@ const Dashboard: React.FC = () => {
             </p>
           </div>
 
-          <div className={`rounded-lg border p-6 shadow-sm ${stats.yearly.balance >= 0 ? "bg-gradient-to-br from-emerald-50 to-white" : "bg-gradient-to-br from-red-50 to-white"}`}>
+          <div className={`rounded-lg shadow-2xl p-6  ${stats.yearly.balance >= 0 ? "bg-gradient-to-br from-emerald-50 to-white" : "bg-gradient-to-br from-red-50 to-white"}`}>
             <p className="text-sm text-gray-600 font-medium">Saldo Tahun Ini</p>
             <p className={`text-3xl font-bold mt-2 ${stats.yearly.balance >= 0 ? "text-emerald-600" : "text-red-600"}`}>
               {currencyFormatter.format(stats.yearly.balance)}
@@ -251,16 +247,13 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Charts */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          {/* Monthly Overview */}
-          <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="rounded-lg border-white bg-white p-6 shadow-2xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Ringkasan Bulanan</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="monthLabel" />
-                <YAxis />
                 <Tooltip formatter={(value) => currencyFormatter.format(value as number)} />
                 <Legend />
                 <Bar dataKey="income" fill="#10b981" name="Pemasukan" />
@@ -269,14 +262,12 @@ const Dashboard: React.FC = () => {
             </ResponsiveContainer>
           </div>
 
-          {/* Balance Trend */}
-          <div className="rounded-lg border bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Tren Saldo Bulanan</h3>
+          <div className="rounded-lg border-white bg-white p-6 shadow-2xl">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Tren Saldo Bulanan</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="monthLabel" />
-                <YAxis />
                 <Tooltip formatter={(value) => currencyFormatter.format(value as number)} />
                 <Legend />
                 <Line
@@ -290,9 +281,8 @@ const Dashboard: React.FC = () => {
             </ResponsiveContainer>
           </div>
 
-          {/* Income by Type */}
           {incomeData.length > 0 && (
-            <div className="rounded-lg border bg-white p-6 shadow-sm">
+            <div className="rounded-lg border-white bg-white p-6 shadow-2xl">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Pemasukan Berdasarkan Tipe</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
@@ -318,7 +308,7 @@ const Dashboard: React.FC = () => {
 
           {/* Expense by Category */}
           {expenseData.length > 0 && (
-            <div className="rounded-lg border bg-white p-6 shadow-sm">
+            <div className="rounded-lg border-white bg-white p-6 shadow-2xl">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Pengeluaran Berdasarkan Kategori</h3>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
@@ -346,7 +336,7 @@ const Dashboard: React.FC = () => {
         {/* Recent Transactions */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           {/* Recent Payments */}
-          <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="rounded-lg border-white bg-white p-6 shadow-2xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Pembayaran Terbaru</h3>
             <div className="space-y-3 max-h-64 overflow-y-auto">
               {stats.recent_payments.length > 0 ? (
@@ -375,7 +365,7 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Recent Expenses */}
-          <div className="rounded-lg border bg-white p-6 shadow-sm">
+          <div className="rounded-lg border-white bg-white p-6 shadow-2xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Pengeluaran Terbaru</h3>
             <div className="space-y-3 max-h-64 overflow-y-auto">
               {stats.recent_expenses.length > 0 ? (

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\Constanta\PaymentsConst;
 use App\Http\Controllers\Controller;
 use App\Models\Mhouse;
 use App\Models\Mresidents;
@@ -174,7 +175,6 @@ class DashboardController extends Controller
                 ], 422);
             }
 
-            // Check if charges already exist for this month
             $existingCharges = Payments::query()
                 ->where('month', $month)
                 ->where('year', $year)
@@ -194,7 +194,6 @@ class DashboardController extends Controller
                     ->delete();
             }
 
-            // Get all active residents with Tetap status
             $activeResidents = Trhouse_residents::query()
                 ->with(['resident', 'house'])
                 ->where('is_active', true)
@@ -214,7 +213,6 @@ class DashboardController extends Controller
                 ]);
             }
 
-            // Fixed rates
             $rates = [
                 'Satpam' => 100000,
                 'Kebersihan' => 15000,
@@ -231,7 +229,8 @@ class DashboardController extends Controller
                             'type' => $type,
                             'month' => $month,
                             'year' => $year,
-                            'status' => 'Belum Bayar',
+                            'period' => 1,
+                            'status' => PaymentsConst::BELUM_BAYAR,
                             'paid_at' => null,
                         ]);
                         $createdCount++;

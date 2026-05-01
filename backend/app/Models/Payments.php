@@ -11,6 +11,7 @@ class Payments extends Model
     protected $fillable = [
         'trhouse_resident_id',
         'month',
+        'period',
         'amount',
         'type',
         'year',

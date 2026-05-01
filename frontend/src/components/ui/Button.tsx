@@ -11,7 +11,8 @@ const Button: React.FC<ButtonProps> = ({
   Icon, 
   variant = 'primary', 
   size = 'md', 
-  children, 
+  children,
+  className = '',
   ...rest 
 }) => {
   const baseClasses = 'inline-flex items-center justify-center rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
@@ -37,7 +38,7 @@ const Button: React.FC<ButtonProps> = ({
   }[size];
 
   return (
-    <button className={`${baseClasses} ${variantClasses} ${sizeClasses}`} {...rest}>
+    <button className={`${baseClasses} ${variantClasses} ${sizeClasses} ${className}`} {...rest}>
       {Icon && <Icon className={`mr-2 ${iconSizeClasses}`} />}
       {children}
     </button>
