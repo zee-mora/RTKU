@@ -17,6 +17,7 @@ return new class extends Migration
             $table->decimal('amount', 15, 2);
             $table->enum('type', ['Satpam', 'Kebersihan']);
             $table->integer('month');
+            $table->integer('period')->nullable();
             $table->integer('year');
             $table->enum('status', ['Lunas', 'Belum Bayar']);
             $table->timestamp('paid_at')->nullable();
