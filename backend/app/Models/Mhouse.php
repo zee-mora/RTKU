@@ -10,15 +10,13 @@ class Mhouse extends Model
 
 	protected $fillable = [
 		'house_number',
-		'block_name',
-		'occupancy_status',
-		'current_resident_id',
-		'notes',
+		'address_detail',
+		'is_occupied',
 	];
 
-	public function currentResident()
+	public function currentOccupancy()
 	{
-		return $this->belongsTo(Mresidents::class, 'current_resident_id');
+		return $this->hasOne(Trhouse_residents::class, 'house_id')->where('is_active', true)->whereNull('end_date');
 	}
 
 	public function occupancies()

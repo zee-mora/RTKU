@@ -25,4 +25,9 @@ class Trhouse_residents extends Model
     {
         return $this->belongsTo(Mresidents::class, 'resident_id');
     }
+
+    public function payments()
+    {
+        return $this->hasMany(Payments::class, 'trhouse_resident_id');
+    }
 }

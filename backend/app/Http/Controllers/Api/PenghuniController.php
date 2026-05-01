@@ -11,6 +11,16 @@ use Illuminate\Support\Facades\Storage;
 
 class PenghuniController extends Controller
 {
+    public function options()
+    {
+        return response()->json([
+            'data' => Mresidents::query()
+                ->select('id', 'fullname')
+                ->orderBy('fullname')
+                ->get(),
+        ]);
+    }
+
     /**
      * get resident details by id
      * @param int $id

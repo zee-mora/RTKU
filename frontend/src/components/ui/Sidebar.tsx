@@ -74,6 +74,22 @@ const Sidebar: React.FC = () => {
                     >
                         <span>Iuran</span>
                     </NavLink>
+                    <NavLink
+                        to="/master/pengeluaran"
+                        className={({ isActive }) =>
+                            `${linkBase} text-xs ${isActive ? 'bg-emerald-600 text-white' : 'text-emerald-800 hover:bg-emerald-50'}`
+                        }
+                    >
+                        <span>Pengeluaran</span>
+                    </NavLink>
+                    <NavLink
+                        to="/master/laporan/keuangan"
+                        className={({ isActive }) =>
+                            `${linkBase} text-xs ${isActive ? 'bg-emerald-600 text-white' : 'text-emerald-800 hover:bg-emerald-50'}`
+                        }
+                    >
+                        <span>Laporan Keuangan</span>
+                    </NavLink>
                 </div>
             </nav>
 

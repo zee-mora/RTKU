@@ -8,6 +8,9 @@ import Dashboard from "../pages/Dashboard";
 import MasterPenghuni from "../pages/Master/Penghuni";
 import MasterRumah from "../pages/Master/Rumah";
 import FormPenghuni from "../pages/Master/Penghuni/FormPenghuni";
+import MasterIuran from "../pages/Master/Iuran";
+import MasterPengeluaran from "../pages/Master/Pengeluaran";
+import FinanceReports from "../pages/Reports/Finance";
 
 const PrivateRoute = () => {
   const token = localStorage.getItem("access_token");
@@ -31,6 +34,9 @@ const AppRoutes = () => {
             <Route path="penghuni/add" element={<FormPenghuni />} />
             <Route path="penghuni/edit/:id" element={<FormPenghuni />} />
             <Route path="rumah" element={<MasterRumah />} />
+            <Route path="iuran" element={<MasterIuran />} />
+            <Route path="pengeluaran" element={<MasterPengeluaran />} />
+            <Route path="laporan/keuangan" element={<FinanceReports />} />
           </Route>
 
         </Route>

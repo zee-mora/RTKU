@@ -1,11 +1,15 @@
 import React from 'react';
-import { Bell, PowerCircle } from 'lucide-react';
+import { Bell, PowerCircle, Menu } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useModal } from '../../hooks/UseModal';
 
-const Navbar: React.FC = () => {
-    const { logout } = useAuth();
-    const { show, close } = useModal();
+interface NavbarProps {
+    onToggleSidebar?: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
+        const { logout } = useAuth();
+        const { show, close } = useModal();
 
     const handleLogout = () => {
         show(
@@ -46,6 +50,14 @@ const Navbar: React.FC = () => {
     return (
         <header className="h-16 rounded-b-2xl shadow-lg border-b border-emerald-100 bg-white/90 backdrop-blur-md px-6 flex items-center justify-between sticky ml-2 mr-2 top-0 z-20">
             <div className="flex items-center gap-3">
+                <button
+                    type="button"
+                    onClick={() => onToggleSidebar?.()}
+                    className="p-2 rounded-xl text-emerald-700 hover:bg-emerald-100 transition-colors mr-2"
+                    aria-label="Toggle sidebar"
+                >
+                    <Menu size={18} />
+                </button>
                 <h1 className="text-base md:text-lg font-bold text-emerald-900">RTKU Dashboard</h1>
             </div>
 

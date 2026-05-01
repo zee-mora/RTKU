@@ -21,11 +21,6 @@ class Mresidents extends Model
         'created_by',
     ];
 
-    public function houses()
-    {
-        return $this->hasMany(Mhouse::class, 'current_resident_id');
-    }
-
     public function occupancies()
     {
         return $this->hasMany(Trhouse_residents::class, 'resident_id');
