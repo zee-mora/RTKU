@@ -148,6 +148,7 @@ DB_DATABASE=rtku
 DB_USERNAME=root
 DB_PASSWORD=
 ```
+if ur mysql have a password fill DB_PASSWORD = (with ur password)
 
 Then run migrations:
 
