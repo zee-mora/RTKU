@@ -15,6 +15,10 @@ use Illuminate\Validation\Rule;
 use App\Helpers\Constanta\PaymentsConst;
 class PaymentsController extends Controller
 {
+    /**
+     * Get payment options for active residents yang akan di gunakan untuk selectfield di frontend      
+     * @return JsonResponse
+     */
     public function options(): JsonResponse
     {
         $options = Trhouse_residents::query()
@@ -40,14 +44,11 @@ class PaymentsController extends Controller
         return response()->json(['data' => $options]);
     }
 
-    public function setLunas(Request $request, int $id): JsonResponse
-    {
-        $payment = Payments::query()->findOrFail($id);
-        $payment->update(['status' => PaymentsConst::LUNAS, 'paid_at' => now()]);
-
-        return response()->json(['message' => 'Status pembayaran diperbarui menjadi Lunas.', 'data' => $payment]);
-    }
-
+    /**
+     * Get payments datatable function untuk menampilkan data pembayaran dengan format datatable yang sudah di sesuaikan dengan kebutuhan frontend
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function datatable(Request $request)
     {
         return Datatables::method(
@@ -85,6 +86,10 @@ class PaymentsController extends Controller
         )->make();
     }
 
+    /**
+     * function store untuk menyimpan data pembayaran baru yang di kirim dari frontend dengan validasi yang sudah di sesuaikan dengan kebutuhan frontend
+     * @return JsonResponse
+     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -141,6 +146,12 @@ class PaymentsController extends Controller
         ], 201);
     }
 
+    /**
+     * function update untuk memperbarui data pembayaran yang di kirim dari frontend dengan validasi yang sudah di sesuaikan dengan kebutuhan frontend
+     * @param Request $request
+     * @param int $id
+     * @return JsonResponse
+     */
     public function update(Request $request, int $id): JsonResponse
     {
         $payment = Payments::query()->findOrFail($id);
@@ -168,6 +179,11 @@ class PaymentsController extends Controller
         return response()->json(['message' => 'Pembayaran diperbarui.', 'data' => $payment], 200);
     }
 
+    /**
+     * function destroy untuk menghapus data pembayaran yang di kirim dari frontend dengan validasi yang sudah di sesuaikan dengan kebutuhan frontend
+     * @param int $id
+     * @return JsonResponse
+     */
     public function destroy(int $id): JsonResponse
     {
         $payment = Payments::query()->findOrFail($id);
@@ -176,6 +192,11 @@ class PaymentsController extends Controller
         return response()->json(['message' => 'Pembayaran dihapus.'], 200);
     }
 
+    /**
+     * Generate monthly charges function untuk membuat data pembayaran baru secara otomatis untuk setiap penghuni aktif di bulan tertentu dengan jenis iuran yang sudah di tentukan
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function reportSummary(Request $request): JsonResponse
     {
         $year = (int) ($request->input('year') ?? date('Y'));
@@ -207,6 +228,11 @@ class PaymentsController extends Controller
         return response()->json(['data' => $data]);
     }
 
+    /**
+     * Get monthly report details function untuk menampilkan data pembayaran dan pengeluaran secara detail di bulan tertentu dengan jenis iuran yang sudah di tentukan
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function reportDetail(Request $request): JsonResponse
     {
         $year = (int) ($request->input('year') ?? date('Y'));

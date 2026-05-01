@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Building2, CalendarClock, Eye, PencilLine, RefreshCw, Users } from "lucide-react";
+import { Building2, CalendarClock, Eye, PencilLine, RefreshCw, Trash2, Users } from "lucide-react";
 
 import PageContainer from "../../../components/layout/PageContainer";
 import Breadcrumb from "../../../components/ui/Breadcrumb";
@@ -8,7 +8,7 @@ import Button from "../../../components/ui/Button";
 import DataTable from "../../../components/DataTable/DataTable";
 import InputForm from "../../../components/ui/InputForm";
 import SelectField from "../../../components/ui/SelectField";
-import { showToast } from "../../../utils/alert";
+import { showConfirmDialog, showToast } from "../../../utils/alert";
 import api from "../../../api/axios";
 import { triggerDatatableRefetch } from "../../../components/DataTable/DatatableRegistry";
 
@@ -175,6 +175,27 @@ const MasterRumah = () => {
     [form.resident_id, residentOptions],
   );
 
+
+  function handleDelete(houseId: number) {
+    showConfirmDialog("Konfirmasi Hapus", "Apakah Anda yakin ingin menghapus rumah ini?", "Ya, Hapus", "Batal")
+      .then((result) => {
+        if (result.isConfirmed) {
+          api.delete(`/houses/${houseId}`)
+            .then(() => {
+              showToast("success", "Berhasil", "Rumah berhasil dihapus.");
+              triggerDatatableRefetch("table-rumah");
+            })
+            .catch((error) => {
+              console.error(error);
+              showToast("error", "Gagal", "Tidak dapat menghapus rumah.");
+            });
+        } else {
+          showToast("error", "Dibatalkan", "Penghapusan rumah dibatalkan.");
+        }
+      })
+  };
+
+
   const columns = useMemo<ColumnDef<HouseRow>[]>(
     () => [
       { accessorKey: "index", header: "NO" },
@@ -206,7 +227,8 @@ const MasterRumah = () => {
       },
       {
         accessorKey: "actions",
-        header: "Aksi",
+        header: "Actions",
+
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-2">
             <Button
@@ -226,7 +248,6 @@ const MasterRumah = () => {
                 void loadHouseDetail(row.original.id);
               }}
             >
-              Edit
             </Button>
             <Button
               size="sm"
@@ -234,7 +255,8 @@ const MasterRumah = () => {
               Icon={Eye}
               onClick={() => openHistoryTab(row.original.id)}
             >
-              Detail
+            </Button>
+            <Button size="sm" variant="danger" Icon={Trash2} onClick={() => handleDelete(row.original.id)}>
             </Button>
           </div>
         ),

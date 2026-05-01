@@ -11,13 +11,13 @@ use App\Models\Trhouse_residents;
 use App\Models\Expenses;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     /**
      * Get dashboard statistics
+     * @return JsonResponse
      */
     public function statistics(): JsonResponse
     {
@@ -30,7 +30,6 @@ class DashboardController extends Controller
             ->whereNull('end_date')
             ->count();
 
-        // Monthly charges calculation
         $currentYear = now()->year;
         $currentMonth = now()->month;
 
@@ -48,12 +47,10 @@ class DashboardController extends Controller
 
         $totalMonthlyIncome = $expectedMonthlyIncome + $paidMonthlyIncome;
 
-        // Outstanding payments
         $outstandingPayments = Payments::query()
             ->where('status', 'Belum Bayar')
             ->sum('amount');
 
-        // Recent transactions
         $recentPayments = Payments::query()
             ->join('trhouse_residents as tr', 'tr.id', '=', 'payments.trhouse_resident_id')
             ->join('Mresidents as r', 'r.id', '=', 'tr.resident_id')
@@ -86,7 +83,6 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Yearly balance
         $yearlyIncome = Payments::query()
             ->where('status', 'Lunas')
             ->where('year', $currentYear)
@@ -126,6 +122,7 @@ class DashboardController extends Controller
 
     /**
      * Get monthly overview chart data
+     * @return JsonResponse
      */
     public function monthlyOverview(Request $request): JsonResponse
     {
@@ -161,6 +158,7 @@ class DashboardController extends Controller
 
     /**
      * Trigger monthly charges generation
+     * @return JsonResponse
      */
     public function generateMonthlyCharges(Request $request): JsonResponse
     {
@@ -254,6 +252,10 @@ class DashboardController extends Controller
         }
     }
 
+    /**
+     * Get yearly income vs expenses summary
+     * @return JsonResponse
+     */
     public function incomeExpenseSummary(Request $req): JsonResponse
     {
         $year = (int) $req->input('year', now()->year);

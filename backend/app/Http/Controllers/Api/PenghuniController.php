@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Mhouse;
 use App\Models\Mresidents;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -113,7 +114,7 @@ class PenghuniController extends Controller
      * Update existing resident function
      * @param Request $request
      * @param int $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function update(Request $request, $id)
     {
@@ -160,7 +161,7 @@ class PenghuniController extends Controller
     /**
      * Delete existing resident
      * @param int|string $id
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function destroy($id)
     {

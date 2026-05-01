@@ -15,6 +15,7 @@ class ExpensesController extends Controller
 {
     /**
      * Get all expense categories
+     * @return JsonResponse
      */
     public function categories(): JsonResponse
     {
@@ -32,7 +33,8 @@ class ExpensesController extends Controller
     }
 
     /**
-     * Get expenses datatable
+     * Raw Queary for datatable 
+     * @return JsonResponse
      */
     public function datatable(Request $request)
     {
@@ -62,7 +64,9 @@ class ExpensesController extends Controller
     }
 
     /**
-     * Get single expense
+     * function Get single expense details
+     * @param int $id
+     * @return JsonResponse
      */
     public function show(int $id): JsonResponse
     {
@@ -81,7 +85,9 @@ class ExpensesController extends Controller
     }
 
     /**
-     * Create new expense
+     * function Create new expense
+     * @param Request $request
+     * @return JsonResponse
      */
     public function store(Request $request): JsonResponse
     {
@@ -107,7 +113,10 @@ class ExpensesController extends Controller
     }
 
     /**
-     * Update expense
+     * Update function for expense
+     * @param Request $request
+     * @param int $id
+     * @return JsonResponse
      */
     public function update(Request $request, int $id): JsonResponse
     {
@@ -135,7 +144,9 @@ class ExpensesController extends Controller
     }
 
     /**
-     * Delete expense
+     * Delete function for expense
+     * @param int $id
+     * @return JsonResponse
      */
     public function destroy(int $id): JsonResponse
     {
@@ -146,7 +157,9 @@ class ExpensesController extends Controller
     }
 
     /**
-     * Get monthly summary
+     * Get monthly summary data
+     * @param Request $request
+     * @return JsonResponse
      */
     public function monthlySummary(Request $request): JsonResponse
     {

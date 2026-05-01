@@ -48,6 +48,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/houses/{id}', [RumahController::class, 'show']);
     Route::post('/houses', [RumahController::class, 'store']);
     Route::put('/houses/{id}', [RumahController::class, 'update']);
+    Route::delete('/houses/{id}', [RumahController::class,'destroy']);
 
     // Payments
     Route::get('/payments/options', [PaymentsController::class, 'options']);

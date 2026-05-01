@@ -16,6 +16,10 @@ use Illuminate\Validation\ValidationException;
 
 class RumahController extends Controller
 {
+    /**
+     * Get house options for active residents yang akan di gunakan untuk selectfield di frontend      
+     * @return JsonResponse
+     */
     public function datatable(Request $request)
     {
         $currentOccupancy = DB::table('trhouse_residents as tr')
@@ -59,66 +63,11 @@ class RumahController extends Controller
         )->make();
     }
 
-    public function history_Penghuni_dt(Request $request, int $id)
-    {
-        return Datatables::method(
-            DB::table('trhouse_residents as tr')
-                ->join('Mresidents as r', 'r.id', '=', 'tr.resident_id')
-                ->where('tr.house_id', $id)
-                ->select([
-                    'tr.id',
-                    'tr.house_id',
-                    'tr.resident_id',
-                    'r.fullname as resident_name',
-                    'tr.start_date',
-                    'tr.end_date',
-                    'tr.is_active',
-                ]),
-            [
-                'id',
-                'resident_name',
-                'start_date',
-                'end_date',
-                'is_active',
-            ],
-            $request,
-        )->make();
-    }
-
-    public function history_Pembayaran_dt(Request $request, int $id)
-    {
-        return Datatables::method(
-            DB::table('payments as p')
-                ->join('trhouse_residents as tr', 'tr.id', '=', 'p.trhouse_resident_id')
-                ->join('Mresidents as r', 'r.id', '=', 'tr.resident_id')
-                ->join('Mhouses as h', 'h.id', '=', 'tr.house_id')
-                ->where('h.id', $id)
-                ->select([
-                    'p.id',
-                    'p.trhouse_resident_id',
-                    'tr.resident_id',
-                    'r.fullname as resident_name',
-                    'p.type',
-                    'p.month',
-                    'p.year',
-                    'p.amount',
-                    'p.status',
-                    'p.paid_at',
-                ]),
-            [
-                'id',
-                'resident_name',
-                'type',
-                'month',
-                'year',
-                'amount',
-                'status',
-                'paid_at',
-            ],
-            $request,
-        )->make();
-    }
-
+    /**
+     * Get house details by id function untuk menampilkan data rumah secara detail berdasarkan id rumah yang di kirim dari frontend dengan informasi penghuni saat ini, riwayat penghuni, dan riwayat pembayaran di rumah tersebut
+     * @param int $id
+     * @return JsonResponse
+     */
     public function show(int $id): JsonResponse
     {
         $house = Mhouse::query()->findOrFail($id);
@@ -187,16 +136,32 @@ class RumahController extends Controller
         ]);
     }
 
+    /**
+     * Store new house function untuk menyimpan data rumah baru yang di kirim dari frontend dengan validasi yang sudah di sesuaikan dengan kebutuhan frontend
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function store(Request $request): JsonResponse
     {
         return $this->saveHouse($request);
     }
 
+    /**
+     * Update existing house function untuk memperbarui data rumah yang di kirim dari frontend dengan validasi yang sudah di sesuaikan dengan kebutuhan frontend
+     * @param Request $request
+     * @param int $id
+     * @return JsonResponse
+     */
     public function update(Request $request, int $id): JsonResponse
     {
         return $this->saveHouse($request, $id);
     }
 
+    /**
+     * function untuk menghapus data rumah yang di kirim dari frontend dengan validasi yang sudah di sesuaikan dengan kebutuhan frontend
+     * @param int $id
+     * @return JsonResponse
+     */
     private function saveHouse(Request $request, ?int $id = null): JsonResponse
     {
         $house = $id ? Mhouse::query()->findOrFail($id) : new Mhouse();
@@ -216,7 +181,7 @@ class RumahController extends Controller
         $isOccupied = (bool) $validated['is_occupied'];
         $residentId = $validated['resident_id'] ?? null;
 
-        if ($isOccupied && ! $residentId) {
+        if ($isOccupied && !$residentId) {
             throw ValidationException::withMessages([
                 'resident_id' => 'Pilih penghuni jika status rumah dihuni.',
             ]);
@@ -234,7 +199,7 @@ class RumahController extends Controller
                 ->whereNull('end_date')
                 ->get();
 
-            if (! $isOccupied) {
+            if (!$isOccupied) {
                 foreach ($activeOccupancies as $occupancy) {
                     $occupancy->is_active = false;
                     $occupancy->end_date = Carbon::today();
@@ -269,5 +234,13 @@ class RumahController extends Controller
             'message' => $id ? 'Rumah berhasil diperbarui.' : 'Rumah berhasil ditambahkan.',
             'data' => $this->show($house->id)->getData(true)['data'],
         ], $id ? 200 : 201);
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        $house = Mhouse::query()->findOrFail($id);
+        $house->delete();
+
+        return response()->json(['message' => 'Rumah berhasil dihapus.']);
     }
 }
