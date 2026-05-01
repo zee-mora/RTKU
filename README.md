@@ -32,7 +32,7 @@ cd RTKU
 npm run setup
 ```
 
-# If you are using Linux or macOS, please install dependencies manually:
+#### If you are using Linux or macOS, please install dependencies manually:
 cd backend && composer install
 cd ../frontend && npm install
 
