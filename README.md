@@ -1,6 +1,6 @@
 # RTKU - Full Stack Application
 
-Modern full-stack web application built with **Laravel** backend and **Vue.js/React** frontend with **Vite**.
+Modern full-stack web application built with **Laravel** backend and **React** frontend with **Vite**.
 
 ## 📋 Prerequisites
 
@@ -14,6 +14,15 @@ Before you begin, ensure you have the following installed on your system:
 
 ## 🚀 Quick Start
 
+### Email And Password
+
+```
+- Email : admin@example.com
+- Password : admin
+```
+
+# Note available after php artisan migrate --seed
+
 ### 1. Clone the Repository
 
 ```bash
@@ -21,10 +30,18 @@ git clone https://github.com/zee-mora/RTKU
 cd RTKU
 ```
 
-### 2. Setup Everything in One Command
+### 2. Setup Everything in One Command 
 
 ```bash
 npm run setup
+```
+
+# if u use linux or mac u should do manualy
+```bash
+
+# Or start them separately:
+cd backend && composer install
+cd frontend && npm install
 ```
 
 This single command will automatically:
@@ -104,7 +121,7 @@ cd frontend && npm run build
 
 ## 🛠️ Backend Configuration
 
-The backend is built with **Laravel 11** and includes:
+The backend is built with **Laravel 12** and includes:
 
 - REST API with JWT authentication
 - Database migrations and seeders
@@ -136,7 +153,7 @@ Then run migrations:
 
 ```bash
 cd backend
-php artisan migrate
+php artisan migrate --seed
 ```
 
 ---
