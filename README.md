@@ -20,8 +20,8 @@ Before you begin, ensure you have the following installed on your system:
 - Email : admin@example.com
 - Password : admin
 ```
+### Note available after php artisan migrate --seed
 
-# Note available after php artisan migrate --seed
 
 ### 1. Clone the Repository
 
