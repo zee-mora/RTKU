@@ -39,7 +39,7 @@ npm run setup
 # if u use linux or mac u should do manualy
 ```bash
 
-# Or start them separately:
+# install them separately:
 cd backend && composer install
 cd frontend && npm install
 ```
