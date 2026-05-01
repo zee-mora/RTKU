@@ -6,6 +6,9 @@ import Button from '../../../components/ui/Button';
 import FormPayment from './FormPayment';
 import { useModal } from '../../../hooks/UseModal';
 import type { ColumnDef } from '@tanstack/react-table';
+import { showConfirmDialog, showToast } from '../../../utils/alert';
+import api from '../../../api/axios';
+import { triggerDatatableRefetch } from '../../../components/DataTable/DatatableRegistry';
 
 type PaymentRow = {
   id: number;
@@ -37,11 +40,13 @@ const MasterIuran: React.FC = () => {
         { accessorKey: 'month', header: 'Bulan' },
         { accessorKey: 'year', header: 'Tahun' },
         { accessorKey: 'amount', header: 'Nominal' },
-        { accessorKey: 'status', header: 'Status', cell: ({ row }) => (
-          <span className={row.original.status === 'Lunas' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
-            {row.original.status}
-          </span>
-        ) },
+        {
+          accessorKey: 'status', header: 'Status', cell: ({ row }) => (
+            <span className={row.original.status === 'Lunas' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
+              {row.original.status}
+            </span>
+          )
+        },
         {
           accessorKey: 'actions',
           header: 'Aksi',
@@ -50,6 +55,9 @@ const MasterIuran: React.FC = () => {
               <Button className="hover:cursor-pointer" size="sm" variant="secondary" onClick={() => handleEdit(row.original)}>
                 Edit
               </Button>
+              <Button className="hover:cursor-pointer" size="sm" variant="danger" onClick={() => handledelete(row.original.id)}>
+                Hapus
+              </Button>
             </div>
           ),
         },
@@ -57,6 +65,25 @@ const MasterIuran: React.FC = () => {
     },
     [show, close],
   );
+
+  function handledelete(paymentId: number) {
+    showConfirmDialog("Konfirmasi Hapus", "Apakah Anda yakin ingin menghapus pembayaran ini?", "Ya, Hapus", "Batal")
+      .then((result) => {
+        if (result.isConfirmed) {
+          api.delete(`/payments/${paymentId}`)
+            .then(() => {
+              showToast("success", "Berhasil", "Pembayaran berhasil dihapus.");
+              triggerDatatableRefetch("table-payments");
+            })
+            .catch((error) => {
+              console.error(error);
+              showToast("error", "Gagal", "Terjadi kesalahan saat menghapus pembayaran.");
+            });
+        } else {
+          showToast("error", "Dibatalkan", "Penghapusan pembayaran dibatalkan.");
+        }
+      });
+  }
 
   const openAdd = () => {
     show(<FormPayment onClose={() => close()} />, { title: 'Tambah Pembayaran', size: 'md' });

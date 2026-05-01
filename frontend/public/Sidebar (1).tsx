@@ -22,7 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         { to: '/master/pengeluaran', label: 'Pengeluaran', icon: TrendingDown },
         { to: '/master/laporan/keuangan', label: 'Laporan Keuangan', icon: FileBarChart2 },
     ];
-    
+
     return (
         <>
             {/* Mobile overlay backdrop */}
@@ -177,7 +177,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     </div>
                 </nav>
 
-                {/* Logout
+                {/* Logout */}
                 <div className="px-3 pb-4 pt-2 border-t border-emerald-100">
                     <button
                         type="button"
@@ -193,7 +193,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         <LogOut size={18} className="flex-shrink-0" />
                         {!isCollapsed && <span>Logout</span>}
                     </button>
-                </div> */}
+                </div>
             </aside>
         </>
     );

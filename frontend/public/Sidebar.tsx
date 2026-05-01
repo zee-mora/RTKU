@@ -1,18 +1,11 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import {
-    LayoutDashboard, LogOut, Home, Users, Receipt,
-    TrendingDown, FileBarChart2, ChevronLeft, Menu, X
-} from 'lucide-react';
+import { LayoutDashboard, LogOut, Home, Users, Receipt, TrendingDown, FileBarChart2, ChevronLeft, Menu, X } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
-interface SidebarProps {
-    isOpen: boolean;
-    onClose: () => void;
-}
-
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+const Sidebar: React.FC = () => {
     const { user, logout } = useAuth();
+    const [isOpen, setIsOpen] = React.useState(false);
     const [isCollapsed, setIsCollapsed] = React.useState(false);
 
     const navItems = [
@@ -22,40 +15,37 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         { to: '/master/pengeluaran', label: 'Pengeluaran', icon: TrendingDown },
         { to: '/master/laporan/keuangan', label: 'Laporan Keuangan', icon: FileBarChart2 },
     ];
-    
+
     return (
         <>
             {/* Mobile overlay backdrop */}
             {isOpen && (
                 <div
                     className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm md:hidden"
-                    onClick={onClose}
+                    onClick={() => setIsOpen(false)}
                 />
             )}
 
-            {/* Mobile hamburger — only shown when sidebar is closed on mobile */}
-            {!isOpen && (
-                <button
-                    onClick={onClose}
-                    className="
-                        fixed top-4 left-4 z-50 md:hidden
-                        flex items-center justify-center
-                        h-10 w-10 rounded-xl
-                        bg-emerald-600 text-white shadow-lg shadow-emerald-500/30
-                        hover:bg-emerald-700 active:scale-95
-                        transition-all duration-200
-                    "
-                    aria-label="Open sidebar"
-                >
-                    <Menu size={18} />
-                </button>
-            )}
+            {/* Mobile hamburger toggle */}
+            <button
+                onClick={() => setIsOpen(prev => !prev)}
+                className="
+                    fixed top-4 left-4 z-50 md:hidden
+                    flex items-center justify-center
+                    h-10 w-10 rounded-xl
+                    bg-emerald-600 text-white shadow-lg shadow-emerald-500/30
+                    hover:bg-emerald-700 active:scale-95
+                    transition-all duration-200
+                "
+                aria-label="Toggle sidebar"
+            >
+                {isOpen ? <X size={18} /> : <Menu size={18} />}
+            </button>
 
             {/* Sidebar */}
             <aside
                 className={`
-                    fixed md:sticky md:top-0 z-40 top-0 left-0
-                    h-screen flex-shrink-0
+                    fixed md:static z-40 top-0 left-0 h-full
                     flex flex-col
                     border-r border-emerald-100 bg-white/95 backdrop-blur-md shadow-xl
                     transition-all duration-300 ease-in-out
@@ -63,8 +53,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     md:translate-x-0
                     ${isCollapsed ? 'md:w-[72px]' : 'w-64'}
                 `}
+                style={{ minHeight: '100vh' }}
             >
-                {/* Desktop collapse toggle — sits on the edge */}
+                {/* Desktop collapse toggle button — sits on the edge */}
                 <button
                     onClick={() => setIsCollapsed(prev => !prev)}
                     className="
@@ -86,23 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     />
                 </button>
 
-                {/* Mobile close button inside sidebar */}
-                <button
-                    onClick={onClose}
-                    className="
-                        absolute top-3 right-3 z-10
-                        md:hidden
-                        flex items-center justify-center
-                        h-8 w-8 rounded-lg
-                        text-emerald-500 hover:bg-emerald-100
-                        transition-all duration-200
-                    "
-                    aria-label="Close sidebar"
-                >
-                    <X size={16} />
-                </button>
-
-                {/* Profile */}
+                {/* Header / profile */}
                 <div className={`
                     flex items-center gap-3 mx-3 mt-4 mb-2 px-3 py-3 rounded-xl
                     bg-emerald-50 border border-emerald-100
@@ -128,9 +103,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
                 {/* Nav */}
                 <nav className="flex-1 px-3 mt-2 space-y-0.5 overflow-y-auto">
+                    {/* Dashboard */}
                     <NavLink
                         to="/dashboard"
-                        onClick={onClose}
+                        onClick={() => setIsOpen(false)}
                         className={({ isActive }) => `
                             flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold
                             transition-all duration-150
@@ -146,19 +122,23 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         {!isCollapsed && <span>Dashboard</span>}
                     </NavLink>
 
+                    {/* Section header */}
                     {!isCollapsed && (
                         <p className="px-3 pt-4 pb-1 text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
                             Pengelolaan
                         </p>
                     )}
-                    {isCollapsed && <div className="my-2 mx-3 border-t border-emerald-100" />}
+                    {isCollapsed && (
+                        <div className="my-2 mx-3 border-t border-emerald-100" />
+                    )}
 
+                    {/* Sub-nav items */}
                     <div className={`space-y-0.5 ${!isCollapsed ? 'pl-2' : ''}`}>
                         {navItems.map(({ to, label, icon: Icon }) => (
                             <NavLink
                                 key={to}
                                 to={to}
-                                onClick={onClose}
+                                onClick={() => setIsOpen(false)}
                                 className={({ isActive }) => `
                                     flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
                                     transition-all duration-150
@@ -177,7 +157,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     </div>
                 </nav>
 
-                {/* Logout
+                {/* Footer / logout */}
                 <div className="px-3 pb-4 pt-2 border-t border-emerald-100">
                     <button
                         type="button"
@@ -193,7 +173,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                         <LogOut size={18} className="flex-shrink-0" />
                         {!isCollapsed && <span>Logout</span>}
                     </button>
-                </div> */}
+                </div>
             </aside>
         </>
     );
