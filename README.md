@@ -20,8 +20,8 @@ Before you begin, ensure you have the following installed on your system:
 - Email : admin@example.com
 - Password : admin
 ```
+### *Note available after php artisan migrate --seed
 
-# Note available after php artisan migrate --seed
 
 ### 1. Clone the Repository
 
@@ -39,7 +39,7 @@ npm run setup
 # if u use linux or mac u should do manualy
 ```bash
 
-# Or start them separately:
+# install them separately:
 cd backend && composer install
 cd frontend && npm install
 ```
@@ -148,6 +148,7 @@ DB_DATABASE=rtku
 DB_USERNAME=root
 DB_PASSWORD=
 ```
+if ur mysql have a password fill DB_PASSWORD = (with ur password)
 
 Then run migrations:
 
