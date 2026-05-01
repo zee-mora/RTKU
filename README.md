@@ -14,14 +14,10 @@ Before you begin, ensure you have the following installed on your system:
 
 ## 🚀 Quick Start
 
-### Email And Password
-
-```
-- Email : admin@example.com
-- Password : admin
-```
-### *Note available after php artisan migrate --seed
-
+### 🔑 Default Credentials
+- **Email** : admin@example.com
+- **Password** : admin
+*> Note: Run migrations with seeders to create this account.*
 
 ### 1. Clone the Repository
 
@@ -36,13 +32,9 @@ cd RTKU
 npm run setup
 ```
 
-# if u use linux or mac u should do manualy
-```bash
-
-# install them separately:
+# If you are using Linux or macOS, please install dependencies manually:
 cd backend && composer install
-cd frontend && npm install
-```
+cd ../frontend && npm install
 
 This single command will automatically:
 - Install root dependencies
@@ -138,7 +130,8 @@ When you run `npm run setup:backend`, it:
 
 ### Database Configuration
 
-Update your database credentials in `backend/.env`:
+1. Create a database named `rtku` in your MySQL server.
+2. Update your credentials in `backend/.env`.
 
 ```env
 DB_CONNECTION=mysql
@@ -148,7 +141,7 @@ DB_DATABASE=rtku
 DB_USERNAME=root
 DB_PASSWORD=
 ```
-if ur mysql have a password fill DB_PASSWORD = (with ur password)
+If your MySQL has a password, please update the DB_PASSWORD field
 
 Then run migrations:
 
@@ -234,6 +227,11 @@ cd frontend && npm run dev -- --port=5174
 
 ---
 
+## 🗺️ Entity Relationship Diagram (ERD) And Feature Documentation
+
+You can find the ERD diagram and Feature in the `docs/` folder or view it [here](https://github.com/zee-mora/RTKU/blob/zeetest/docs/ERD.png).
+
+---
 ## 📝 Additional Resources
 
 - [Laravel Documentation](https://laravel.com/docs)
